@@ -127,6 +127,11 @@ JWT_SECRET="your-secret"
 
 # Running the Development Server
 
+Before run apps, build the packages first
+
+```bash
+pnpm turbo build --filter=@repo/shared
+```
 Start all applications:
 
 ```bash
