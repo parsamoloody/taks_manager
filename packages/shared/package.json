@@ -1,13 +1,8 @@
 {
-  "name": "@repo/shared-types",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "exports": {
-    ".": "./src/index.ts",
-    "./dto": "./src/dto/index.ts",
-    "./enums": "./src/enums/index.ts",
-    "./interfaces": "./src/interfaces/index.ts",
-    "./types": "./src/types/index.ts"
+  "name": "@repo/shared",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
   }
 }

@@ -5,14 +5,11 @@ import { AuthModule } from './modules/auth/auth.module';
 import { PrismaService } from './common/prisma/prisma.service';
 import { PrismaModule } from './common/prisma/prisma.module';
 import { AppConfigModule } from './config/config.module';
+import { WorkspaceModule } from './modules/workspace/workspace.module';
 
 @Module({
-  imports: [
-    AuthModule,
-    PrismaModule,
-    AppConfigModule
-  ],
+  imports: [AuthModule, PrismaModule, AppConfigModule, WorkspaceModule],
   controllers: [AppController],
   providers: [AppService, PrismaService],
 })
-export class AppModule { }
+export class AppModule {}

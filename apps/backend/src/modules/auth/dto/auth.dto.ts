@@ -1,5 +1,5 @@
-import type { AuthDto as AuthDtoType } from "@repo/shared-types";
-import { IsEmail, IsNotEmpty } from "class-validator";
+import type { AuthDto as AuthDtoType } from '@repo/shared-types';
+import { IsEmail, IsNotEmpty } from 'class-validator';
 
 export class AuthDto implements AuthDtoType {
   @IsEmail()
