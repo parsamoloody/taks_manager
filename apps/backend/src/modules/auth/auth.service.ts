@@ -4,7 +4,6 @@ import {
   HttpException,
   Injectable,
   InternalServerErrorException,
-  NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import * as argon from 'argon2';
