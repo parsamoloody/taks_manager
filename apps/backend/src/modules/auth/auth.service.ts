@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   ForbiddenException,
   HttpException,
   Injectable,
@@ -40,14 +41,18 @@ export class AuthService {
     } catch (e) {
       if (e instanceof PrismaClientKnownRequestError) {
         if (e.code === 'P2002') {
-          throw new ForbiddenException('Credentials taken');
+          throw new ConflictException('Credentials taken');
+        }
+
+        if (e instanceof HttpException) {
+          throw e;
         }
       }
-      console.error("Internal server error:", e)
+      
       throw new InternalServerErrorException();
     }
   }
-  
+
   async signin(dto: AuthDto) {
     try {
       const user = await this.prisma.user.findUnique({
