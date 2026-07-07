@@ -54,7 +54,7 @@ export class AuthService {
       if (!user) {
         throw new ForbiddenException('Credentials incorrect');
       }
-      const pwMatches = argon.verify(user.hashedPassword, dto.password);
+      const pwMatches = await argon.verify(user.hashedPassword, dto.password);
       if (!pwMatches) {
         throw new ForbiddenException('Credentials incorrect');
       }
@@ -78,9 +78,9 @@ export class AuthService {
       sub: userId,
       email,
     };
-    const secret = this.config.get('JWT_SECRET');
+    const secret = this.config.get('jwt.secret');
     const token = await this.jwt.signAsync(payload, {
-      expiresIn: '5d',
+      expiresIn: this.config.get('jwt.ttl'),
       secret,
     });
 
