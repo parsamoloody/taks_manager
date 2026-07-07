@@ -1,7 +1,9 @@
 import {
   ForbiddenException,
+  HttpException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import * as argon from 'argon2';
@@ -16,7 +18,7 @@ export class AuthService {
     private prisma: PrismaService,
     private jwt: JwtService,
     private config: ConfigService,
-  ) {}
+  ) { }
 
   async signup(dto: AuthDto) {
     try {
@@ -41,10 +43,11 @@ export class AuthService {
           throw new ForbiddenException('Credentials taken');
         }
       }
+      console.error("Internal server error:", e)
       throw new InternalServerErrorException();
     }
   }
-
+  
   async signin(dto: AuthDto) {
     try {
       const user = await this.prisma.user.findUnique({
@@ -54,17 +57,20 @@ export class AuthService {
       if (!user) {
         throw new ForbiddenException('Credentials incorrect');
       }
-      const pwMatches = await argon.verify(user.hashedPassword, dto.password);
-      if (!pwMatches) {
+
+      const passwordMatches = await argon.verify(
+        user.hashedPassword,
+        dto.password,
+      );
+
+      if (!passwordMatches) {
         throw new ForbiddenException('Credentials incorrect');
       }
 
       return this.signToken(user.id, user.email);
-    } catch (e) {
-      if (e instanceof PrismaClientKnownRequestError) {
-        if (e.code === 'P2011') {
-          throw new ForbiddenException('User not found');
-        }
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
       }
       throw new InternalServerErrorException();
     }
