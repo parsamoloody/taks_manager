@@ -25,10 +25,10 @@ export class WorkspaceController {
   }
 
   @UseGuards(JwtGuard)
-  @Delete()
+  @Delete("/:workspaceId")
   remove(
     @GetUser() user: User,
-    @Param() workspaceId: string
+    @Param("workspaceId") workspaceId: string
   ) {
     return this.workspaceService.remove(user.id, workspaceId);
   }
