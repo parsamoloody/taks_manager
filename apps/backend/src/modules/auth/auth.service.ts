@@ -47,7 +47,7 @@ export class AuthService {
           throw e;
         }
       }
-      
+
       throw new InternalServerErrorException();
     }
   }
@@ -80,7 +80,7 @@ export class AuthService {
     }
   }
 
-  async signToken(
+  private async signToken(
     userId: string,
     email: string,
   ): Promise<{ access_token: string }> {
