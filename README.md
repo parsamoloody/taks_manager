@@ -1,241 +1,153 @@
-# taks manager
+# task_manager
+
 A modern task management application designed to help individuals and teams organize their work efficiently. this task manager provides an intuitive Kanban board experience with workspaces, boards, lists, and tasks, making it easy to plan, track, and collaborate on projects.
 
 Built with a modern full-stack architecture using NestJS, ReactJs, Prisma, and PostgreSQL, the project emphasizes clean architecture, scalability, and maintainability. It serves as both a practical productivity tool and a reference implementation for building modular, production-ready web applications.
 
-# Monorepo Overview
+## Monorepo Overview
 
-This project is built using **Turborepo** and **pnpm workspaces**. The repository contains multiple applications and shared packages that can be developed together in a single workspace.
-
----
-
-# Shared Package
-
-The shared package contains code that can be reused by both the backend and frontend.
-
-Typical contents include:
-
-* DTO interfaces
-* TypeScript types
-* Enums
-* Interfaces
-* Constants
-* Utility functions that do not depend on a specific framework
-
-## Importing Shared Types
-
-You can import shared types directly from the shared package in both the backend and frontend.
-
-Backend:
-
-```ts
-import type { AuthDto } from '@repo/shared';
-```
-
-Frontend:
-
-```ts
-import type { AuthDto } from '@repo/shared';
-```
-
-The backend uses these shared interfaces as contracts, while NestJS DTO classes remain inside the backend application to provide runtime validation with `class-validator`.
-
-Example:
-
-```ts
-// packages/shared/src/dto/auth.dto.ts
-
-export interface AuthDto {
-  email: string;
-  password: string;
-}
-```
-
-```ts
-// apps/backend/src/auth/dto/auth.dto.ts
-
-import type { AuthDto as SharedAuthDto } from '@repo/shared';
-
-export class AuthDto implements SharedAuthDto {
-  @IsEmail()
-  email: string;
-
-  @MinLength(8)
-  password: string;
-}
-```
-
-This approach provides:
-
-* A single shared TypeScript contract.
-* Runtime validation only where it is required (backend).
-* No unnecessary frontend dependencies on NestJS or `class-validator`.
+This project is built using Turborepo and pnpm workspaces. The repository contains multiple applications and shared packages that can be developed together in a single workspace.
 
 ---
 
-# Getting Started
+## Quick Start
 
-## Prerequisites
+Prereqs: Node.js 22+, pnpm, PostgreSQL.
 
-* Node.js 22+
-* pnpm
-* PostgreSQL
-
-Install pnpm if it is not already installed:
-
-```bash
-npm install -g pnpm
-```
-
----
-
-# Installation
-
-Clone the repository:
+Clone and install:
 
 ```bash
 git clone https://github.com/parsamoloody/taks_manager.git
 cd taks_manager
-```
-
-Install all dependencies:
-
-```bash
 pnpm install
 ```
 
----
-
-# Environment Variables
-
-Create the required environment files.
-
-Backend:
-
-```text
-apps/backend/.env
-```
-
-Example:
-
-```env
-DATABASE_URL="postgresql://user:password@localhost:5432/task_manager"
-JWT_SECRET="your-secret"
-```
-
----
-
-# Running the Development Server
-
-Before run apps, build the packages first
+Build the shared package (required before running apps):
 
 ```bash
 pnpm turbo build --filter=@repo/shared
 ```
-Start all applications:
+
+Run apps (all):
 
 ```bash
 pnpm turbo run dev
 ```
 
-Run only the backend:
+Run only the backend or frontend:
 
 ```bash
 pnpm turbo run dev --filter=backend
-```
-
-Run only the frontend:
-
-```bash
 pnpm turbo run dev --filter=web
 ```
 
 ---
 
-# Build (not built yet)
+## Using the shared package
 
-Build every application and package:
+Purpose: share lightweight TypeScript types, enums, and helpers (no NestJS runtime code).
 
-```bash
-pnpm turbo run build
-```
-
-Build only the backend:
+Edit `packages/shared/src`, export from `packages/shared/src/index.ts`, then build:
 
 ```bash
-pnpm turbo run build --filter=backend
+pnpm turbo build --filter=@repo/shared
 ```
 
----
+Add a workspace dependency in an app's `package.json`:
 
-# Lint
+```json
+"dependencies": {
+  "@repo/shared": "workspace:*"
+}
+```
 
-Run linting for the entire workspace:
+At repo root run:
 
 ```bash
-pnpm turbo run lint
+pnpm install
+pnpm turbo build --filter=@repo/shared
 ```
 
----
-
-# Tests
-
-Run tests across the workspace:
-
-```bash
-pnpm turbo run test
-```
-
-Backend only:
-
-```bash
-pnpm turbo run test --filter=backend
-```
-
----
-
-# Adding a New Shared Type
-
-1. Create the file.
-
-```text
-packages/shared/src/dto/create-board.dto.ts
-```
-
-2. Export it from the appropriate `index.ts`.
+Import in app code:
 
 ```ts
-export * from './create-board.dto';
-```
-
-3. Import it from any application.
-
-```ts
-import type { CreateBoardDto } from '@repo/shared';
+import type { AuthDto } from '@repo/shared';
 ```
 
 ---
 
-# Development Workflow
+## Adding a React app (quick)
 
-1. Create or modify shared types in `packages/shared`.
-2. Implement backend validation using NestJS DTO classes.
-3. Reuse shared interfaces in both backend and frontend.
-4. Start the applications with Turborepo using `pnpm turbo run dev`.
-5. Develop features independently while keeping shared contracts synchronized.
+Create a new Vite React app inside `apps/`:
 
-## Backend
+```bash
+pnpm create vite apps/web -- --template react-ts
+cd apps/web
+```
 
-The backend is built with NestJS using a modular architecture and Prisma ORM with PostgreSQL for data persistence. It exposes a RESTful API for all CRUD operations, while the architecture is designed to support real-time collaboration features in the future.
+Add the shared package to `apps/web/package.json`:
 
-### Tech Stack
-- Framework: NestJS
-- Language: TypeScript
-- Database: PostgreSQL
-- ORM: Prisma
-- Authentication: JWT (Access & Refresh Tokens)
-- Validation: class-validator & class-transformer
-- API Style: REST
-- Architecture: Modular Monolith
-- Package Manager: pnpm
-- Monorepo: Turborepo
+```json
+"dependencies": {
+  "@repo/shared": "workspace:*"
+}
+```
+
+From repository root:
+
+```bash
+pnpm install
+pnpm turbo build --filter=@repo/shared
+pnpm turbo run dev --filter=web
+```
+
+Import shared types in the React app:
+
+```ts
+import type { WorkspaceDto } from '@repo/shared';
+```
+
+---
+
+## Environment
+
+Place env files per app, e.g. [apps/backend/.env](apps/backend/.env).
+Example `apps/backend/.env`:
+
+```env
+DATABASE_URL="postgresql://user:password@localhost:5432/task_manager"
+JWT_SECRET="your-secret"
+JWT_TTL=3600s
+```
+
+---
+
+## Commands reference
+
+Install deps:
+
+```bash
+pnpm install
+```
+
+Build shared package:
+
+```bash
+pnpm turbo build --filter=@repo/shared
+```
+
+Run all apps as dev:
+
+```bash
+pnpm turbo run dev
+```
+
+Run only backend:
+
+```bash
+pnpm turbo run dev --filter=backend
+```
+
+---
+
+If you want, I can add a minimal `apps/web` example and wire `@repo/shared` into it.
