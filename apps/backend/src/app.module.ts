@@ -4,7 +4,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { PrismaService } from './common/prisma/prisma.service';
 import { PrismaModule } from './common/prisma/prisma.module';
-import { AppConfigModule } from './config/config.module';
+import { AppConfigModule } from './common/config/config.module';
 import { WorkspaceModule } from './modules/workspace/workspace.module';
 
 @Module({
