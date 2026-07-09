@@ -38,15 +38,27 @@ export class BoardService {
                     name: dto.name,
                     description: dto.description,
                     visibility: dto.visibility,
+                    members: {
+                        create: {
+                            userId,
+                        }
+                    }
                 },
-            });
-
-            await this.prisma.boardMember.create({
-                data: {
-                    userId,
-                    boardId: board.id,
+                include: {
+                    members: {
+                        include: {
+                            user: {
+                                select: {
+                                    id: true,
+                                    email: true,
+                                    firstName: true,
+                                    lastName: true,
+                                }
+                            }
+                        }
+                    }
                 }
-            })
+            });
 
             this.logger.log(
                 `Board created successfully: ${board.id} by user: ${userId}`,
@@ -71,6 +83,13 @@ export class BoardService {
             const boards = await this.prisma.board.findMany({
                 where: {
                     workspaceId,
+                    AND: {
+                        members: {
+                            some: {
+                                userId
+                            }
+                        }
+                    }
                 },
                 orderBy: {
                     createdAt: 'asc',
@@ -105,6 +124,7 @@ export class BoardService {
                 where: {
                     id: boardId,
                     workspaceId,
+
                 },
                 include: {
                     lists: {
@@ -142,6 +162,13 @@ export class BoardService {
             const board = await this.prisma.board.findUnique({
                 where: {
                     id: boardId,
+                    AND: {
+                        members: {
+                            some: {
+                                userId
+                            }
+                        }
+                    }
                 },
                 include: {
                     workspace: {
@@ -186,6 +213,13 @@ export class BoardService {
             const board = await this.prisma.board.findUnique({
                 where: {
                     id: boardId,
+                    AND: {
+                        members: {
+                            some: {
+                                userId
+                            }
+                        }
+                    }
                 },
             });
 
