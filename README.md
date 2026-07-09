@@ -147,7 +147,3 @@ Run only backend:
 ```bash
 pnpm turbo run dev --filter=backend
 ```
-
----
-
-If you want, I can add a minimal `apps/web` example and wire `@repo/shared` into it.
