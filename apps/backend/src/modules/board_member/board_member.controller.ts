@@ -25,7 +25,7 @@ export class BoardMemberController {
   }
 
   @UseGuards(JwtGuard)
-  @Get()
+  @Get(':boardId')
   findAll(
     @Param('boardId') boardId: string,
   ) {
