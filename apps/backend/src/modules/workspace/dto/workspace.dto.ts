@@ -1,6 +1,6 @@
 import { IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 
-import type { CreateOrUpdateWorkspaceDto as SharedCreateOrUpdateWorkspaceDto } from '@repo/shared-types';
+import type { CreateOrUpdateWorkspaceDto as SharedCreateOrUpdateWorkspaceDto } from '@repo/shared';
 
 export class CreateOrUpdateWorkspaceDto implements SharedCreateOrUpdateWorkspaceDto {
   @IsString()
