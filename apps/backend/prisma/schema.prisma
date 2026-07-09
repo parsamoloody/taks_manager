@@ -18,7 +18,6 @@ enum BoardVisibility {
   WORKSPACE
 }
 
-
 enum TaskPriority {
   LOW
   MEDIUM
@@ -32,7 +31,7 @@ model User {
   firstName String?
   lastName  String?
 
-  email    String @unique
+  email          String @unique
   hashedPassword String
 
   avatar String?
@@ -44,6 +43,8 @@ model User {
 
   assignedTasks Task[] @relation("AssignedTasks")
   createdTasks  Task[] @relation("CreatedTasks")
+
+  boardMembers BoardMember[]
 
   comments Comment[]
 }
@@ -95,9 +96,23 @@ model Board {
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
+  members BoardMember[]
+
   lists List[]
 
   labels Label[]
+}
+
+model BoardMember {
+  boardId String
+  userId  String
+
+  joinedAt DateTime @default(now())
+
+  board Board @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([boardId, userId])
 }
 
 model List {
