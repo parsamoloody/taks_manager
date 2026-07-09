@@ -57,7 +57,7 @@ export class BoardService {
                             }
                         }
                     }
-                }
+                },
             });
 
             this.logger.log(
@@ -83,13 +83,27 @@ export class BoardService {
             const boards = await this.prisma.board.findMany({
                 where: {
                     workspaceId,
-                    AND: {
-                        members: {
-                            some: {
-                                userId
-                            }
-                        }
-                    }
+                    OR: [
+                        // WORKSPACE boards - all workspace members can see
+                        {
+                            visibility: 'WORKSPACE',
+                        },
+                        // PRIVATE boards - only board members can see
+                        {
+                            AND: [
+                                {
+                                    visibility: 'PRIVATE',
+                                },
+                                {
+                                    members: {
+                                        some: {
+                                            userId,
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                    ],
                 },
                 orderBy: {
                     createdAt: 'asc',
@@ -124,7 +138,27 @@ export class BoardService {
                 where: {
                     id: boardId,
                     workspaceId,
-
+                    OR: [
+                        // WORKSPACE boards - all workspace members can see
+                        {
+                            visibility: 'WORKSPACE',
+                        },
+                        // PRIVATE boards - only board members can see
+                        {
+                            AND: [
+                                {
+                                    visibility: 'PRIVATE',
+                                },
+                                {
+                                    members: {
+                                        some: {
+                                            userId,
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                    ],
                 },
                 include: {
                     lists: {
@@ -162,13 +196,6 @@ export class BoardService {
             const board = await this.prisma.board.findUnique({
                 where: {
                     id: boardId,
-                    AND: {
-                        members: {
-                            some: {
-                                userId
-                            }
-                        }
-                    }
                 },
                 include: {
                     workspace: {
@@ -176,8 +203,23 @@ export class BoardService {
                             members: true,
                         },
                     },
+                    members: true,
                 },
             });
+
+            // Check if user has access based on visibility
+            if (board) {
+                if (board.visibility === 'PRIVATE') {
+                    const isMember = board.members.some(
+                        (member) => member.userId === userId,
+                    );
+                    if (!isMember) {
+                        throw new ForbiddenException(
+                            'You do not have access to this private board',
+                        );
+                    }
+                }
+            }
 
             if (!board) {
                 throw new NotFoundException('Board not found');
@@ -213,15 +255,25 @@ export class BoardService {
             const board = await this.prisma.board.findUnique({
                 where: {
                     id: boardId,
-                    AND: {
-                        members: {
-                            some: {
-                                userId
-                            }
-                        }
-                    }
+                },
+                include: {
+                    members: true,
                 },
             });
+
+            // Check if user has access based on visibility
+            if (board) {
+                if (board.visibility === 'PRIVATE') {
+                    const isMember = board.members.some(
+                        (member) => member.userId === userId,
+                    );
+                    if (!isMember) {
+                        throw new ForbiddenException(
+                            'You do not have access to this private board',
+                        );
+                    }
+                }
+            }
 
             if (!board) {
                 throw new NotFoundException('Board not found');
