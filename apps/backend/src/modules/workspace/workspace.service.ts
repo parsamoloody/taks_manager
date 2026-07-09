@@ -1,107 +1,306 @@
-import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/common/prisma/prisma.service';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
 import { CreateOrUpdateWorkspaceDto } from './dto/workspace.dto';
-import { WorkspaceRole } from '@repo/shared-types';
+import { WorkspaceRole } from '@repo/shared';
 
 @Injectable()
 export class WorkspaceService {
-    constructor(private prisma: PrismaService) { }
+  private readonly logger = new Logger(WorkspaceService.name);
 
-    async createWorkspace(userId: string, dto: CreateOrUpdateWorkspaceDto) {
-        try {
-            const createdWorkspace = await this.prisma.workspace.create({
-                data: {
-                    name: dto.name,
-                    logo: dto.logo,
-                    members: {
-                        create: {
-                            userId,
-                            role: WorkspaceRole.OWNER,
-                        },
-                    },
-                },
-                include: {
-                    members: true,
-                },
+  constructor(private prisma: PrismaService) {}
 
-            });
-            return createdWorkspace
-        } catch (e) {
-            throw new InternalServerErrorException
-        }
+  async createWorkspace(
+    userId: string,
+    dto: CreateOrUpdateWorkspaceDto,
+  ) {
+    try {
+
+      if (!userId) {
+        throw new BadRequestException('User ID is required');
+      }
+
+      if (!dto.name || dto.name.trim() === '') {
+        throw new BadRequestException('Workspace name is required');
+      }
+
+      const createdWorkspace =
+        await this.prisma.workspace.create({
+          data: {
+            name: dto.name,
+            logo: dto.logo,
+            members: {
+              create: {
+                userId,
+                role: WorkspaceRole.OWNER,
+              },
+            },
+          },
+          include: {
+            members: true,
+          },
+        });
+
+      this.logger.log(
+        `Workspace created successfully: ${createdWorkspace.id} by user: ${userId}`,
+      );
+
+      return createdWorkspace;
+    } catch (error) {
+      this.handleError(error, 'Failed to create workspace');
     }
+  }
 
-    async findAll(userId: string) {
-        try {
-            return this.prisma.workspace.findMany({
-                where: {
-                    members: {
-                        some: {
-                            userId,
-                        },
-                    },
-                },
-                include: {
-                    members: true,
-                },
-            });
-        } catch (e) {
-            throw new InternalServerErrorException
-        }
+  async updateWorkspace(
+    userId: string,
+    workspaceId: string,
+    dto: CreateOrUpdateWorkspaceDto,
+  ) {
+    try {
+
+      if (!userId || !workspaceId) {
+        throw new BadRequestException(
+          'User ID and Workspace ID are required',
+        );
+      }
+
+      if (!dto.name || dto.name.trim() === '') {
+        throw new BadRequestException('Workspace name is required');
+      }
+
+      await this.ensureOwner(workspaceId, userId);
+
+      const updatedWorkspace =
+        await this.prisma.workspace.update({
+          where: {
+            id: workspaceId,
+          },
+          data: {
+            name: dto.name,
+            logo: dto.logo,
+          },
+          include: {
+            members: true,
+          },
+        });
+
+      this.logger.log(
+        `Workspace updated successfully: ${workspaceId} by user: ${userId}`,
+      );
+
+      return updatedWorkspace;
+    } catch (error) {
+      this.handleError(error, 'Failed to update workspace');
     }
+  }
 
-    async remove(workspaceId: string, userId: string) {
-        try {
-            await this.ensureOwner(workspaceId, userId);
-            await this.prisma.workspace.delete({ where: { id: workspaceId } })
-            return {
-                message: 'Workspace deleted successfully',
-            };
-        } catch (e) {
-            throw new InternalServerErrorException
-        }
+  async findAll(userId: string) {
+    try {
+
+      if (!userId) {
+        throw new BadRequestException('User ID is required');
+      }
+
+      const workspaces = await this.prisma.workspace.findMany(
+        {
+          where: {
+            members: {
+              some: {
+                userId,
+              },
+            },
+          },
+          include: {
+            members: true,
+          },
+        },
+      );
+
+      this.logger.log(
+        `Retrieved ${workspaces.length} workspaces for user: ${userId}`,
+      );
+
+      return workspaces;
+    } catch (error) {
+      this.handleError(
+        error,
+        'Failed to retrieve workspaces',
+      );
     }
+  }
 
-    async update(
-        userId: string,
-        workspaceId: string,
-        dto: CreateOrUpdateWorkspaceDto
+  async remove(
+    workspaceId: string,
+    userId: string,
+  ) {
+    try {
+
+      if (!workspaceId || !userId) {
+        throw new BadRequestException(
+          'Workspace ID and User ID are required',
+        );
+      }
+
+      await this.ensureOwner(workspaceId, userId);
+
+      await this.prisma.workspace.delete({
+        where: {
+          id: workspaceId,
+        },
+      });
+
+      this.logger.log(
+        `Workspace deleted successfully: ${workspaceId} by user: ${userId}`,
+      );
+
+      return {
+        message: 'Workspace deleted successfully',
+        workspaceId,
+      };
+    } catch (error) {
+      this.handleError(error, 'Failed to delete workspace');
+    }
+  }
+
+  async update(
+    userId: string,
+    workspaceId: string,
+    dto: CreateOrUpdateWorkspaceDto,
+  ) {
+    try {
+
+      if (!userId || !workspaceId) {
+        throw new BadRequestException(
+          'User ID and Workspace ID are required',
+        );
+      }
+
+      if (!dto.name || dto.name.trim() === '') {
+        throw new BadRequestException('Workspace name is required');
+      }
+
+      await this.ensureOwner(workspaceId, userId);
+
+      const updatedWorkspace =
+        await this.prisma.workspace.update({
+          where: {
+            id: workspaceId,
+          },
+          data: {
+            name: dto.name,
+            logo: dto.logo,
+          },
+          include: {
+            members: true,
+          },
+        });
+
+      this.logger.log(
+        `Workspace updated successfully: ${workspaceId} by user: ${userId}`,
+      );
+
+      return updatedWorkspace;
+    } catch (error) {
+      this.handleError(error, 'Failed to update workspace');
+    }
+  }
+
+  private async ensureOwner(
+    workspaceId: string,
+    userId: string,
+  ): Promise<void> {
+    try {
+
+      if (!workspaceId || !userId) {
+        throw new BadRequestException(
+          'Workspace ID and User ID are required',
+        );
+      }
+
+      const member =
+        await this.prisma.workspaceMember.findUnique({
+          where: {
+            workspaceId_userId: {
+              workspaceId,
+              userId,
+            },
+          },
+        });
+
+      if (!member) {
+        throw new NotFoundException(
+          'Workspace not found or user is not a member',
+        );
+      }
+
+      if (member.role !== WorkspaceRole.OWNER) {
+        throw new ForbiddenException(
+          'Only the workspace owner can perform this action',
+        );
+      }
+    } catch (error) {
+      if (
+        error instanceof ForbiddenException ||
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+
+      this.logger.error(
+        `Error checking workspace ownership: ${error}`,
+      );
+      throw new InternalServerErrorException(
+        'Failed to verify workspace ownership',
+      );
+    }
+  }
+
+  private handleError(error: unknown, context: string): never {
+
+    if (
+      error instanceof ForbiddenException ||
+      error instanceof NotFoundException ||
+      error instanceof BadRequestException
     ) {
-        try {
-            await this.ensureOwner(workspaceId, userId);
-            return await this.prisma.workspace.update({
-                where: {
-                    id: workspaceId
-                },
-                data: dto
-            })
-        } catch (e) {
-            throw new InternalServerErrorException
-        }
+      throw error;
     }
 
-    private async ensureOwner(
-        workspaceId: string,
-        userId: string,
-    ) {
-        const member =
-            await this.prisma.workspaceMember.findUnique({
-                where: {
-                    workspaceId_userId: {
-                        workspaceId,
-                        userId,
-                    },
-                },
-            });
+    if (error instanceof PrismaClientKnownRequestError) {
+      this.logger.error(
+        `Prisma error in ${context}: ${error.message}`,
+      );
 
-        if (!member) {
-            throw new NotFoundException('Workspace not found');
-        }
+      if (error.code === 'P2025') {
+        throw new NotFoundException('Resource not found');
+      }
 
-        if (member.role !== WorkspaceRole.OWNER) {
-            throw new ForbiddenException(
-                'Only the workspace owner can perform this action',
-            );
-        }
+      if (error.code === 'P2003') {
+        throw new BadRequestException(
+          'Invalid reference to related resource',
+        );
+      }
+
+      if (error.code === 'P2002') {
+        throw new BadRequestException(
+          'Workspace with this name already exists',
+        );
+      }
     }
+
+    if (error instanceof Error) {
+      this.logger.error(`${context}: ${error.message}`);
+    } else {
+      this.logger.error(`${context}: Unknown error occurred`);
+    }
+
+    throw new InternalServerErrorException(context);
+  }
 }

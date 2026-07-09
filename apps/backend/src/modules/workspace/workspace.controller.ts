@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { CreateOrUpdateWorkspaceDto } from './dto/workspace.dto';
 import { GetUser } from 'src/common/decorator';
 import type { User } from '@prisma/client';
@@ -22,6 +22,16 @@ export class WorkspaceController {
   @Get()
   findAll(@GetUser() user: User) {
     return this.workspaceService.findAll(user.id);
+  }
+
+  @UseGuards(JwtGuard)
+  @Put(':workspaceId')
+  update(
+    @GetUser() user: User,
+    @Param('workspaceId') workspaceId: string,
+    @Body() dto: CreateOrUpdateWorkspaceDto
+  ) {
+    return this.workspaceService.updateWorkspace(user.id, workspaceId, dto);
   }
 
   @UseGuards(JwtGuard)
