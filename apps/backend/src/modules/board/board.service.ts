@@ -1,0 +1,285 @@
+import {
+    BadRequestException,
+    ForbiddenException,
+    Injectable,
+    InternalServerErrorException,
+    Logger,
+    NotFoundException,
+} from '@nestjs/common';
+import { PrismaService } from 'src/common/prisma/prisma.service';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
+import { CreateBoardDto } from './dto/create_board.dto';
+import { UpdateBoardDto } from './dto/update_board.dto';
+
+@Injectable()
+export class BoardService {
+    private readonly logger = new Logger(BoardService.name);
+
+    constructor(private prisma: PrismaService) { }
+
+    async create(
+        workspaceId: string,
+        userId: string,
+        dto: CreateBoardDto,
+    ) {
+        try {
+
+            if (!workspaceId || !userId) {
+                throw new BadRequestException(
+                    'Workspace ID and User ID are required',
+                );
+            }
+
+            await this.ensureMember(workspaceId, userId);
+
+            const board = await this.prisma.board.create({
+                data: {
+                    workspaceId,
+                    name: dto.name,
+                    description: dto.description,
+                    visibility: dto.visibility,
+                },
+            });
+
+            await this.prisma.boardMember.create({
+                data: {
+                    userId,
+                    boardId: board.id,
+                }
+            })
+
+            this.logger.log(
+                `Board created successfully: ${board.id} by user: ${userId}`,
+            );
+            return board;
+        } catch (error) {
+            this.handleError(error, 'Failed to create board');
+        }
+    }
+
+    async findAll(workspaceId: string, userId: string) {
+        try {
+
+            if (!workspaceId || !userId) {
+                throw new BadRequestException(
+                    'Workspace ID and User ID are required',
+                );
+            }
+
+            await this.ensureMember(workspaceId, userId);
+
+            const boards = await this.prisma.board.findMany({
+                where: {
+                    workspaceId,
+                },
+                orderBy: {
+                    createdAt: 'asc',
+                },
+            });
+
+            this.logger.log(
+                `Retrieved ${boards.length} boards for workspace: ${workspaceId}`,
+            );
+            return boards;
+        } catch (error) {
+            this.handleError(error, 'Failed to retrieve boards');
+        }
+    }
+
+    async findOne(
+        workspaceId: string,
+        boardId: string,
+        userId: string,
+    ) {
+        try {
+
+            if (!workspaceId || !boardId || !userId) {
+                throw new BadRequestException(
+                    'Workspace ID, Board ID, and User ID are required',
+                );
+            }
+
+            await this.ensureMember(workspaceId, userId);
+
+            const board = await this.prisma.board.findFirst({
+                where: {
+                    id: boardId,
+                    workspaceId,
+                },
+                include: {
+                    lists: {
+                        orderBy: {
+                            createdAt: 'asc',
+                        },
+                    },
+                },
+            });
+
+            if (!board) {
+                throw new NotFoundException('Board not found');
+            }
+
+            this.logger.log(`Retrieved board: ${boardId}`);
+            return board;
+        } catch (error) {
+            this.handleError(error, 'Failed to retrieve board');
+        }
+    }
+
+    async update(
+        boardId: string,
+        userId: string,
+        dto: UpdateBoardDto,
+    ) {
+        try {
+
+            if (!boardId || !userId) {
+                throw new BadRequestException(
+                    'Board ID and User ID are required',
+                );
+            }
+
+            const board = await this.prisma.board.findUnique({
+                where: {
+                    id: boardId,
+                },
+                include: {
+                    workspace: {
+                        include: {
+                            members: true,
+                        },
+                    },
+                },
+            });
+
+            if (!board) {
+                throw new NotFoundException('Board not found');
+            }
+
+            await this.ensureMember(board.workspaceId, userId);
+
+            const updatedBoard = await this.prisma.board.update({
+                where: {
+                    id: boardId,
+                },
+                data: dto,
+            });
+
+            this.logger.log(
+                `Board updated successfully: ${boardId} by user: ${userId}`,
+            );
+            return updatedBoard;
+        } catch (error) {
+            this.handleError(error, 'Failed to update board');
+        }
+    }
+
+    async remove(boardId: string, userId: string) {
+        try {
+
+            if (!boardId || !userId) {
+                throw new BadRequestException(
+                    'Board ID and User ID are required',
+                );
+            }
+
+            const board = await this.prisma.board.findUnique({
+                where: {
+                    id: boardId,
+                },
+            });
+
+            if (!board) {
+                throw new NotFoundException('Board not found');
+            }
+
+            await this.ensureMember(board.workspaceId, userId);
+
+            await this.prisma.board.delete({
+                where: {
+                    id: boardId,
+                },
+            });
+
+            this.logger.log(
+                `Board deleted successfully: ${boardId} by user: ${userId}`,
+            );
+
+            return {
+                message: 'Board deleted successfully',
+                boardId,
+            };
+        } catch (error) {
+            this.handleError(error, 'Failed to delete board');
+        }
+    }
+
+    private async ensureMember(
+        workspaceId: string,
+        userId: string,
+    ): Promise<void> {
+        try {
+            const member =
+                await this.prisma.workspaceMember.findUnique({
+                    where: {
+                        workspaceId_userId: {
+                            workspaceId,
+                            userId,
+                        },
+                    },
+                });
+
+            if (!member) {
+                throw new ForbiddenException(
+                    'You are not a member of this workspace',
+                );
+            }
+        } catch (error) {
+            if (error instanceof ForbiddenException) {
+                throw error;
+            }
+            this.logger.error(
+                `Error checking workspace membership: ${error}`,
+            );
+            throw new InternalServerErrorException(
+                'Failed to verify workspace membership',
+            );
+        }
+    }
+
+    private handleError(error: unknown, context: string): never {
+        if (error instanceof ForbiddenException) {
+            throw error;
+        }
+
+        if (error instanceof NotFoundException) {
+            throw error;
+        }
+
+        if (error instanceof BadRequestException) {
+            throw error;
+        }
+
+        if (error instanceof PrismaClientKnownRequestError) {
+            this.logger.error(
+                `Prisma error in ${context}: ${error.message}`,
+            );
+
+            if (error.code === 'P2025') {
+                throw new NotFoundException('Resource not found');
+            }
+
+            if (error.code === 'P2003') {
+                throw new BadRequestException('Invalid foreign key reference');
+            }
+        }
+
+        if (error instanceof Error) {
+            this.logger.error(`${context}: ${error.message}`);
+        } else {
+            this.logger.error(`${context}: Unknown error occurred`);
+        }
+
+        throw new InternalServerErrorException(context);
+    }
+}
