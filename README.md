@@ -53,7 +53,13 @@ Edit `packages/shared/src`, export from `packages/shared/src/index.ts`, then bui
 pnpm turbo build --filter=@repo/shared
 ```
 
-Add a workspace dependency in an app's `package.json`:
+you have two way to add shared package (manually or commandline)
+
+commandline: (recommended):
+```bash
+pnpm add @repo/shared --filter web --workspace
+```
+manually: Add a workspace dependency in an app's `package.json`:
 
 ```json
 "dependencies": {
@@ -82,22 +88,36 @@ Create a new Vite React app inside `apps/`:
 
 ```bash
 pnpm create vite apps/web -- --template react-ts
-cd apps/web
 ```
 
-Add the shared package to `apps/web/package.json`:
+change the app name:
+1- open the `apps/web/package.json` file
+2- change the `name` to web or something you like, like this:
 
 ```json
-"dependencies": {
-  "@repo/shared": "workspace:*"
-}
+{
+  "name": "web",
+  "private": true,
+  "type": "module",
+```
+
+install dependencies of workspace apps and packages:
+```bash
+pnpm install
+```
+build shared package:
+```bash
+pnpm turbo build --filter=@repo/shared
+```
+
+Add the shared package to your new app:
+```bash
+pnpm add @repo/shared --filter web --workspace
 ```
 
 From repository root:
 
 ```bash
-pnpm install
-pnpm turbo build --filter=@repo/shared
 pnpm turbo run dev --filter=web
 ```
 
@@ -116,8 +136,9 @@ Example `apps/backend/.env`:
 
 ```env
 DATABASE_URL="postgresql://user:password@localhost:5432/task_manager"
-JWT_SECRET="your-secret"
-JWT_TTL=3600s
+JWT_SECRET="some_secret"
+JWT_TTL="3600s"
+PORT="4000"
 ```
 
 ---
