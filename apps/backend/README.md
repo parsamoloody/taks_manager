@@ -1,98 +1,211 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Backend API Documentation
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+This backend powers the Task Manager application. It is built with NestJS, Prisma, PostgreSQL, and JWT-based authentication.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Tech stack
 
-## Description
+- NestJS - application framework for building scalable APIs
+- TypeScript - main language for the server code
+- Prisma ORM - database access and migrations
+- PostgreSQL - primary database
+- JWT + Passport - authentication and authorization
+- Swagger - interactive API documentation
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Project structure
 
-## Project setup
+- src/main.ts - application entry point
+- src/app.module.ts - root module that wires all feature modules
+- src/modules/auth - authentication endpoints
+- src/modules/workspace - workspace and workspace member management
+- src/modules/board - board CRUD operations
+- src/modules/board_member - board member management
+- src/common - shared configuration, guards, decorators, Prisma service
 
-```bash
-$ pnpm install
-```
+## How it works
 
-## Compile and run the project
+1. The app starts from the NestJS bootstrap file and loads the root module.
+2. Configuration is loaded from environment variables through the config module.
+3. Prisma connects to PostgreSQL using the database URL from the environment.
+4. Feature modules expose REST endpoints for auth, workspaces, boards, and members.
+5. Protected routes use a JWT guard, so requests must include a valid bearer token.
+6. Swagger documentation is available at the docs endpoint for testing the API interactively.
 
-```bash
-# development
-$ pnpm run start
+## Setup your database
+Follow these steps to create a PostgreSQL user, database, and configure Prisma.
 
-# watch mode
-$ pnpm run start:dev
+#### 1. Login to PostgreSQL
 
-# production mode
-$ pnpm run start:prod
-```
-
-## Run tests
+Open your terminal and connect as the PostgreSQL superuser:
 
 ```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+sudo -u postgres psql
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Or, if you're using Windows:
 
 ```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+psql -U postgres
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+---
 
-## Resources
+#### 2. Create a New Database User
 
-Check out a few resources that may come in handy when working with NestJS:
+Replace `myuser` and `mypassword` with your own values.
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```sql
+CREATE USER myuser WITH PASSWORD 'mypassword';
+```
 
-## Support
+---
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+#### 3. Create a Database
 
-## Stay in touch
+Replace `mydatabase` with your preferred database name.
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```sql
+CREATE DATABASE mydatabase;
+```
 
-## License
+---
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+#### 4. Grant Ownership of the Database
+
+```sql
+ALTER DATABASE mydatabase OWNER TO myuser;
+```
+
+---
+
+#### 5. Grant All Privileges
+
+Grant all privileges on the database to the user.
+
+```sql
+GRANT ALL PRIVILEGES ON DATABASE mydatabase TO myuser;
+```
+
+If you already have tables or schemas, also run:
+
+```sql
+GRANT ALL ON SCHEMA public TO myuser;
+```
+
+(Optional) Make the user the default owner of future objects:
+
+```sql
+ALTER SCHEMA public OWNER TO myuser;
+```
+
+---
+
+#### 6. Verify the Database
+
+List all databases:
+
+```sql
+\l
+```
+
+List all users:
+
+```sql
+\du
+```
+
+Exit PostgreSQL:
+
+```sql
+\q
+```
+## Environment variables
+
+Create a .env file in the backend app folder with values similar to:
+
+```env
+PORT=8000
+NODE_ENV=development
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/task_manager
+JWT_SECRET=your_super_secret_key
+JWT_TTL=1h
+```
+
+## Running the backend
+
+From the repository root:
+
+```bash
+pnpm --filter backend install
+pnpm --filter backend db:migrate
+pnpm --filter backend db:generate
+pnpm --filter backend dev
+```
+
+Or from the backend folder:
+
+```bash
+cd apps/backend
+pnpm install
+pnpm db:migrate
+pnpm db:generate
+pnpm dev
+```
+
+The server will run on:
+
+- http://localhost:8000
+
+Swagger UI is available at:
+
+- http://localhost:8000/docs
+
+## API access
+
+Most endpoints require authentication. After signing in, copy the returned JWT token and send it in the Authorization header:
+
+```http
+Authorization: Bearer <your_token>
+```
+
+## Example: create a workspace
+
+### 1. Sign up
+
+```bash
+curl -X POST http://localhost:8000/auth/signup \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "strongPassword123"
+  }'
+```
+
+### 2. Sign in
+
+```bash
+curl -X POST http://localhost:8000/auth/signin \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "strongPassword123"
+  }'
+```
+
+The response will contain a JWT token.
+
+### 3. Create a workspace
+
+```bash
+curl -X POST http://localhost:8000/workspace \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <your_token>" \
+  -d '{
+    "name": "Product Team",
+    "logo": "https://example.com/logo.png"
+  }'
+```
+
+## Notes
+
+- The Swagger UI is the easiest way to explore the API and test protected routes.
+- If you are running the app locally, make sure PostgreSQL is available and the DATABASE_URL points to a valid database.
