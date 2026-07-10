@@ -10,6 +10,13 @@ This project is built using Turborepo and pnpm workspaces. The repository contai
 
 ---
 
+## APPS
+#### Backend
+- [document](https://github.com/parsamoloody/taks_manager/tree/main/apps/backend#backend-api-documentation)
+- path: apps/backend
+#### Web
+- [document](https://github.com/parsamoloody/taks_manager/blob/main/apps/web/README.md)
+- path: apps/web
 ## Quick Start
 
 Prereqs: Node.js 22+, pnpm, PostgreSQL.
