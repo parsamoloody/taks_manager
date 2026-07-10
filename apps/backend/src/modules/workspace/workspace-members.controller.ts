@@ -7,12 +7,15 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { WorkspaceMembersService } from './workspace-members.service';
 import { AddWorkspaceMemberDto } from './dto/workspace_memeber.dto';
 import { JwtGuard } from 'src/guard';
 import { GetUser } from 'src/common/decorator';
 import type { User } from '@prisma/client';
 
+@ApiTags('Workspace Members')
+@ApiBearerAuth()
 @Controller('workspaces/:workspaceId/members')
 export class WorkspaceMembersController {
   constructor(
@@ -21,12 +24,17 @@ export class WorkspaceMembersController {
 
   @UseGuards(JwtGuard)
   @Get()
+  @ApiOperation({ summary: 'List members of a workspace' })
+  @ApiParam({ name: 'workspaceId', description: 'Workspace identifier' })
   findAll(@Param('workspaceId') workspaceId: string) {
     return this.workspaceMembersService.findAll(workspaceId);
   }
 
   @UseGuards(JwtGuard)
   @Get(':userId')
+  @ApiOperation({ summary: 'Get a workspace member' })
+  @ApiParam({ name: 'workspaceId', description: 'Workspace identifier' })
+  @ApiParam({ name: 'userId', description: 'Member user identifier' })
   findOne(
     @Param('workspaceId') workspaceId: string,
     @Param('userId') userId: string,
@@ -39,6 +47,9 @@ export class WorkspaceMembersController {
 
   @UseGuards(JwtGuard)
   @Post()
+  @ApiOperation({ summary: 'Add a member to a workspace' })
+  @ApiParam({ name: 'workspaceId', description: 'Workspace identifier' })
+  @ApiBody({ type: AddWorkspaceMemberDto })
   addMember(
     @Param('workspaceId') workspaceId: string,
     @Body() dto: AddWorkspaceMemberDto,
@@ -53,6 +64,9 @@ export class WorkspaceMembersController {
 
   @UseGuards(JwtGuard)
   @Delete(':userId')
+  @ApiOperation({ summary: 'Remove a member from a workspace' })
+  @ApiParam({ name: 'workspaceId', description: 'Workspace identifier' })
+  @ApiParam({ name: 'userId', description: 'Member user identifier' })
   removeMember(
     @Param('workspaceId') workspaceId: string,
     @Param('userId') userId: string,

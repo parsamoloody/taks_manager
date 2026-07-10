@@ -1,10 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { GetUser } from 'src/common/decorator';
 import { JwtGuard } from 'src/guard';
 import { BoardMemberService } from './board_member.service';
 import { AddBoardMemberDto } from './dto/create_board_member.dto';
 import type { User } from '@prisma/client';
 
+@ApiTags('Board Members')
+@ApiBearerAuth()
 @Controller('board-member')
 export class BoardMemberController {
   constructor(
@@ -13,6 +16,9 @@ export class BoardMemberController {
 
   @UseGuards(JwtGuard)
   @Post(':boardId')
+  @ApiOperation({ summary: 'Add a member to a board' })
+  @ApiParam({ name: 'boardId', description: 'Board identifier' })
+  @ApiBody({ type: AddBoardMemberDto })
   addMember(
     @Param('boardId') boardId: string,
     @Body() dto: AddBoardMemberDto,
@@ -27,6 +33,8 @@ export class BoardMemberController {
 
   @UseGuards(JwtGuard)
   @Get(':boardId')
+  @ApiOperation({ summary: 'List members of a board' })
+  @ApiParam({ name: 'boardId', description: 'Board identifier' })
   findAll(
     @Param('boardId') boardId: string,
   ) {
@@ -35,6 +43,9 @@ export class BoardMemberController {
 
   @UseGuards(JwtGuard)
   @Delete(':userId')
+  @ApiOperation({ summary: 'Remove a member from a board' })
+  @ApiParam({ name: 'boardId', description: 'Board identifier' })
+  @ApiParam({ name: 'userId', description: 'Member user identifier' })
   removeMember(
     @Param('boardId') boardId: string,
     @Param('userId') userId: string,

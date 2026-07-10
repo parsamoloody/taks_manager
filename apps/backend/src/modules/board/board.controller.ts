@@ -1,4 +1,5 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { GetUser } from 'src/common/decorator';
 import type { User } from '@prisma/client';
 import { JwtGuard } from 'src/guard';
@@ -7,6 +8,8 @@ import { BoardService } from './board.service';
 import { CreateBoardDto } from './dto/create_board.dto';
 import { UpdateBoardDto } from './dto/update_board.dto';
 
+@ApiTags('Boards')
+@ApiBearerAuth()
 @Controller('board')
 export class BoardController {
 
@@ -14,6 +17,9 @@ export class BoardController {
 
     @UseGuards(JwtGuard)
     @Post(':workspaceId')
+    @ApiOperation({ summary: 'Create a board in a workspace' })
+    @ApiParam({ name: 'workspaceId', description: 'Workspace identifier' })
+    @ApiBody({ type: CreateBoardDto })
     create(
         @Param('workspaceId') workspaceId: string,
         @Body() dto: CreateBoardDto,
@@ -28,6 +34,8 @@ export class BoardController {
 
     @UseGuards(JwtGuard)
     @Get(':workspaceId')
+    @ApiOperation({ summary: 'List boards in a workspace' })
+    @ApiParam({ name: 'workspaceId', description: 'Workspace identifier' })
     findAll(
         @Param('workspaceId') workspaceId: string,
         @GetUser() currentUser: User
@@ -40,6 +48,9 @@ export class BoardController {
 
     @UseGuards(JwtGuard)
     @Get(':workspaceId/:boardId')
+    @ApiOperation({ summary: 'Get a board by id' })
+    @ApiParam({ name: 'workspaceId', description: 'Workspace identifier' })
+    @ApiParam({ name: 'boardId', description: 'Board identifier' })
     findOne(
         @Param('workspaceId') workspaceId: string,
         @Param('boardId') boardId: string,
@@ -54,6 +65,9 @@ export class BoardController {
 
     @UseGuards(JwtGuard)
     @Put(':boardId')
+    @ApiOperation({ summary: 'Update a board' })
+    @ApiParam({ name: 'boardId', description: 'Board identifier' })
+    @ApiBody({ type: UpdateBoardDto })
     update(
         @Param('boardId') boardId: string,
         @Body() dto: UpdateBoardDto,
@@ -68,6 +82,8 @@ export class BoardController {
 
     @UseGuards(JwtGuard)
     @Delete(':boardId')
+    @ApiOperation({ summary: 'Delete a board' })
+    @ApiParam({ name: 'boardId', description: 'Board identifier' })
     remove(
         @Param('boardId') boardId: string,
         @GetUser() currentUser: User
