@@ -1,4 +1,4 @@
-# task_manager
+# Task Manager
 
 A modern task management application designed to help individuals and teams organize their work efficiently. this task manager provides an intuitive Kanban board experience with workspaces, boards, lists, and tasks, making it easy to plan, track, and collaborate on projects.
 
