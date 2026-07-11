@@ -25,6 +25,11 @@ enum TaskPriority {
   URGENT
 }
 
+enum TaskStatus {
+  DONE
+  PENDING
+}
+
 model User {
   id String @id @default(cuid())
 
@@ -42,8 +47,8 @@ model User {
   workspaces WorkspaceMember[]
 
   TaskAssignee TaskAssignee[]
-  
-  createdTasks  Task[] @relation("CreatedTasks")
+
+  createdTasks Task[] @relation("CreatedTasks")
 
   boardMembers BoardMember[]
 
@@ -154,6 +159,8 @@ model Task {
   title String
 
   description String?
+
+  status TaskStatus @default(PENDING)
 
   order Int
 
