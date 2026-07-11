@@ -41,7 +41,8 @@ model User {
 
   workspaces WorkspaceMember[]
 
-  assignedTasks Task[] @relation("AssignedTasks")
+  TaskAssignee TaskAssignee[]
+  
   createdTasks  Task[] @relation("CreatedTasks")
 
   boardMembers BoardMember[]
@@ -133,6 +134,18 @@ model List {
   tasks Task[]
 }
 
+model TaskAssignee {
+  taskId String
+  userId String
+
+  assignedAt DateTime @default(now())
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, userId])
+}
+
 model Task {
   id String @id @default(cuid())
 
@@ -154,8 +167,6 @@ model Task {
 
   createdById String
 
-  assigneeId String?
-
   createdAt DateTime @default(now())
 
   updatedAt DateTime @updatedAt
@@ -164,7 +175,7 @@ model Task {
 
   createdBy User @relation("CreatedTasks", fields: [createdById], references: [id])
 
-  assignee User? @relation("AssignedTasks", fields: [assigneeId], references: [id])
+  assignee TaskAssignee[]
 
   comments Comment[]
 
