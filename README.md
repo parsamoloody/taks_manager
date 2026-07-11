@@ -175,3 +175,8 @@ Run only backend:
 ```bash
 pnpm turbo run dev --filter=backend
 ```
+---
+### Project diagram
+![image](https://raw.githubusercontent.com/parsamoloody/taks_manager/refs/heads/main/packages/public/assets/imgs/task_manager_diagram.svg)
+---
+You can see this digram in dark mode!
