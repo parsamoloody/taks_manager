@@ -12,7 +12,7 @@ import { TaskModule } from './modules/task/task.module';
 import { ListModule } from './modules/list/list.module';
 
 @Module({
-  imports: [AuthModule, PrismaModule, AppConfigModule, WorkspaceModule, BoardModule, BoardMemberModule, ListModule],
+  imports: [AuthModule, PrismaModule, AppConfigModule, WorkspaceModule, BoardModule, BoardMemberModule, TaskModule, ListModule],
   controllers: [AppController],
   providers: [AppService, PrismaService],
 })
