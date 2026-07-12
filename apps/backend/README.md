@@ -19,6 +19,7 @@ This backend powers the Task Manager application. It is built with NestJS, Prism
 - src/modules/workspace - workspace and workspace member management
 - src/modules/board - board CRUD operations
 - src/modules/board_member - board member management
+- src/modules/task - tasks management
 - src/common - shared configuration, guards, decorators, Prisma service
 
 ## How it works
