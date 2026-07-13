@@ -129,6 +129,7 @@ NODE_ENV=development
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/task_manager
 JWT_SECRET=your_super_secret_key
 JWT_TTL=1h
+FRONT_BASE_URL="http://localhost:5173"
 ```
 
 ## Running the backend

@@ -7,7 +7,16 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService);
   const port = config.get<number>('app.port');
+  const frontBaseUrl = config.get<string>('app.frontBaseUrl');
 
+  app.enableCors({
+    origin: frontBaseUrl,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
+
+  
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Task Manager API')
     .setDescription('API documentation for the Task Manager backend')

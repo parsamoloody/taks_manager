@@ -9,6 +9,8 @@ export const envValidationSchema = Joi.object({
 
   DATABASE_URL: Joi.string().uri().required(),
 
+  FRONT_BASE_URL:Joi.string().uri(),
+
   JWT_SECRET: Joi.string().min(1).required(),
 
   JWT_TTL: Joi.string().min(1).required(),
