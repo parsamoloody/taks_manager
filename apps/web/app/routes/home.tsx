@@ -3,7 +3,7 @@ import type { Route } from "./+types/home";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "TaskFlow" },
+    { title: "Tsk Manager" },
     {
       name: "description",
       content: "A modern task manager designed for calm, focused collaboration.",
@@ -17,7 +17,7 @@ export default function Home() {
       <div className="mx-auto flex max-w-5xl flex-col items-center rounded-[32px] border border-white/10 bg-white/10 p-8 shadow-2xl backdrop-blur-xl sm:p-10 lg:flex-row lg:justify-between lg:p-12">
         <div className="max-w-xl">
           <p className="inline-flex rounded-full border border-sky-400/30 bg-sky-400/10 px-3 py-1 text-sm font-medium text-sky-200">
-            TaskFlow for modern teams
+            Tsk Manager for your teams
           </p>
           <h1 className="mt-5 text-4xl font-semibold leading-tight sm:text-5xl">
             Turn daily work into a calm, shared rhythm.
@@ -45,9 +45,10 @@ export default function Home() {
           <p className="text-sm font-medium text-slate-200">Why teams love it</p>
           <div className="mt-4 space-y-3 text-sm text-slate-300">
             {[
+              "No limit",
+              "Easy to use",
               "Clear daily priorities",
               "Flexible boards for every workflow",
-              "Lightweight UI that stays focused",
             ].map((item) => (
               <div key={item} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
                 {item}
