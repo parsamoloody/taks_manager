@@ -71,11 +71,11 @@ export function AuthPage({ mode }: AuthPageProps) {
       <div className="mx-auto flex max-w-6xl flex-col overflow-hidden rounded-[32px] border border-slate-200/70 bg-white/80 shadow-[0_30px_80px_-24px_rgba(15,23,42,0.28)] backdrop-blur-xl lg:flex-row">
         <section className="relative flex-1 bg-slate-950 p-8 text-white sm:p-10 lg:p-12">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.22),_transparent_40%)]" />
-          <div className="relative z-10 flex h-full flex-col justify-between">
-            <div>
               <div className="inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-sm font-medium text-slate-100">
-                TaskFlow
+                Task Manager
               </div>
+          <div className="relative z-10 justify-center flex h-full flex-col justify-between">
+            <div>
               <h1 className="mt-6 text-3xl font-semibold leading-tight sm:text-4xl">
                 Organize your work with calm, clear momentum.
               </h1>
@@ -83,7 +83,7 @@ export function AuthPage({ mode }: AuthPageProps) {
                 Keep boards, lists, and tasks in one beautifully simple place so your team can move faster without feeling rushed.
               </p>
             </div>
-
+{/* 
             <div className="mt-8 space-y-3 text-sm text-slate-200">
               {[
                 "Shared boards for every project",
@@ -97,7 +97,7 @@ export function AuthPage({ mode }: AuthPageProps) {
                   <span>{item}</span>
                 </div>
               ))}
-            </div>
+            </div> */}
           </div>
         </section>
 
@@ -108,11 +108,11 @@ export function AuthPage({ mode }: AuthPageProps) {
                 <p className="text-sm font-semibold text-slate-900">
                   {isLogin ? "Welcome back" : "Create your account"}
                 </p>
-                <p className="text-sm text-slate-500">
+                {/* <p className="text-sm text-slate-500">
                   {isLogin
                     ? "Sign in to continue where you left off."
                     : "Start organizing your work in minutes."}
-                </p>
+                </p> */}
               </div>
               <Link
                 to={isLogin ? "/signup" : "/login"}
@@ -168,9 +168,9 @@ export function AuthPage({ mode }: AuthPageProps) {
               </button>
             </form>
 
-            <div className="mt-6 rounded-2xl border border-slate-200 bg-white/80 p-4 text-sm text-slate-600">
+            {/* <div className="mt-6 rounded-2xl border border-slate-200 bg-white/80 p-4 text-sm text-slate-600">
               By continuing, you agree to our terms and privacy policy.
-            </div>
+            </div> */}
           </div>
         </section>
       </div>
