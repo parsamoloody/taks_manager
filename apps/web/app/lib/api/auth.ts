@@ -1,9 +1,6 @@
+import type { AuthDto } from "@repo/shared";
 import { requestJson } from "./client";
 
-interface AuthPayload {
-  email: string;
-  password: string;
-}
 
 interface AuthResponse {
   access_token?: string;
@@ -12,14 +9,14 @@ interface AuthResponse {
   message?: string;
 }
 
-export async function signIn(payload: AuthPayload) {
+export async function signIn(payload: AuthDto) {
   return requestJson<AuthResponse>("auth/signin", {
     method: "POST",
     json: payload,
   });
 }
 
-export async function signUp(payload: AuthPayload) {
+export async function signUp(payload: AuthDto) {
   return requestJson<AuthResponse>("auth/signup", {
     method: "POST",
     json: payload,
