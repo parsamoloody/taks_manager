@@ -100,7 +100,8 @@ export class TaskService {
                 where: {
                     id: taskId,
                     listId,
-                    include: {
+                },
+                include: {
                         assignee: {
                             select: {
                                 userId: true,
@@ -108,7 +109,6 @@ export class TaskService {
                             }
                         }
                     }
-                },
             });
 
             if (!task) {
