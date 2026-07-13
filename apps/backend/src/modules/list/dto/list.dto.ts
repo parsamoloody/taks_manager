@@ -23,12 +23,12 @@ export class UpdateListDto implements SharedUpdateListDto {
   @IsString()
   @MinLength(2)
   @MaxLength(50)
-  title?: string;
+  title: string;
 
   @ApiPropertyOptional({ example: 2 })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(0)
-  order?: number;
+  order: number;
 }
