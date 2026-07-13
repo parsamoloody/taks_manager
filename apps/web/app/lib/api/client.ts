@@ -15,7 +15,7 @@ export class ApiError extends Error {
 }
 
 export const apiClient = ky.create({
-  prefix: API_BASE_URL,
+  baseUrl: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
