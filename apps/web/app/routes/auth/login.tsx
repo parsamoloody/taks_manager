@@ -2,10 +2,10 @@ import { AuthPage } from "../../components/auth/AuthPage";
 
 export function meta() {
   return [
-    { title: "Sign in to TaskFlow" },
+    { title: "Sign in to Task Manager" },
     {
       name: "description",
-      content: "Sign in to TaskFlow and continue organizing your work.",
+      content: "Sign in to Task Manager and continue organizing your work.",
     },
   ];
 }
