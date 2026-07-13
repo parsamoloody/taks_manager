@@ -1,4 +1,4 @@
-import { requestJson, type ApiError } from "./client";
+import { requestJson } from "./client";
 
 interface AuthPayload {
   email: string;
