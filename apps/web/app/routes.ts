@@ -4,4 +4,6 @@ export default [
   index("routes/home.tsx"),
   route("/login", "routes/auth/login.tsx"),
   route("/signup", "routes/auth/signup.tsx"),
+  route("/workspaces", "routes/workspace/workspace.tsx"),
+  route("workspaces/:workspaceId", "routes/workspace/workspace.$workspaceId.tsx"),
 ] satisfies RouteConfig;
