@@ -1,45 +1,46 @@
-import ky, { type Options } from "ky";
+// app/lib/api/client.ts
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
-
-export class ApiError extends Error {
-  status: number;
-  details: unknown;
-
-  constructor(message: string, status: number, details?: unknown) {
-    super(message);
-    this.name = "ApiError";
-    this.status = status;
-    this.details = details;
-  }
+interface RequestOptions extends Omit<RequestInit, "body"> {
+  json?: unknown;
+  token?: string;
 }
 
-export const apiClient = ky.create({
-  baseUrl: API_BASE_URL,
-  headers: {
+export async function requestJson<T>(
+  path: string,
+  options: RequestOptions = {},
+): Promise<T> {
+  const { json, token, headers, ...rest } = options;
+
+  const finalHeaders: Record<string, string> = {
     "Content-Type": "application/json",
-  },
-  retry: 1,
-  timeout: 10000,
-});
+    ...(headers as Record<string, string>),
+  };
+  if (token) finalHeaders["Authorization"] = `Bearer ${token}`;
 
-export async function requestJson<T>(path: string, options?: Options) {
-  try {
-    return (await apiClient(path, options).json()) as T;
-  } catch (error) {
-    if (error && typeof error === "object" && "response" in error) {
-      const httpError = error as {
-        response?: Response;
-        message?: string;
-      };
+  const res = await fetch(`${API_BASE_URL}/${path}`, {
+    ...rest,
+    headers: finalHeaders,
+    body: json !== undefined ? JSON.stringify(json) : undefined,
+  });
 
-      const response = httpError.response;
-      if (response) {
-        const message = await response.text().catch(() => "Request failed");
-        throw new ApiError(message || httpError.message || "Request failed", response.status, message);
-      }
+  if (!res.ok) {
+    let error: unknown;
+    try {
+      error = await res.json();
+    } catch {
+      error = { message: res.statusText };
     }
-
-    throw new ApiError("Request failed", 500, error);
+    throw error;
   }
+
+  if (res.status === 204) return undefined as T;
+  return res.json();
+}
+
+export function getErrorMessage(error: unknown) {
+  if (error && typeof error === "object" && "message" in error) {
+    return String((error as { message?: string }).message);
+  }
+  return "Something went wrong. Please try again.";
 }
