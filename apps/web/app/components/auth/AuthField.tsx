@@ -1,36 +1,36 @@
+// app/components/auth/AuthField.tsx
 interface AuthFieldProps {
   label: string;
+  name: string;
   type: string;
-  value: string;
-  placeholder: string;
+  placeholder?: string;
   autoComplete?: string;
-  onChange: (value: string) => void;
+  defaultValue?: string;
 }
 
 export function AuthField({
   label,
+  name,
   type,
-  value,
   placeholder,
   autoComplete,
-  onChange,
+  defaultValue,
 }: AuthFieldProps) {
   return (
-    <label className="block">
-      <span className="mb-2 block text-sm font-medium text-slate-700">
+    <div>
+      <label htmlFor={name} className="mb-1.5 block text-sm font-medium text-slate-700">
         {label}
-      </span>
-      <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm transition focus-within:border-sky-400 focus-within:ring-4 focus-within:ring-sky-100">
-        <input
-          type={type}
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          placeholder={placeholder}
-          autoComplete={autoComplete}
-          className="w-full border-0 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
-          required
-        />
-      </div>
-    </label>
+      </label>
+      <input
+        id={name}
+        name={name}
+        type={type}
+        required
+        placeholder={placeholder}
+        autoComplete={autoComplete}
+        defaultValue={defaultValue}
+        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-400/20"
+      />
+    </div>
   );
 }
