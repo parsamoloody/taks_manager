@@ -44,7 +44,7 @@ export class WorkspaceController {
   }
 
   @UseGuards(JwtGuard)
-  @Delete("/:workspaceId")
+  @Delete(":workspaceId")
   remove(
     @GetUser() user: User,
     @Param("workspaceId") workspaceId: string
