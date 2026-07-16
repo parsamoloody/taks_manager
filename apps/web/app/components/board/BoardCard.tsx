@@ -32,7 +32,7 @@ export function BoardCard({ board, workspaceId }: BoardCardProps) {
         isDeleting ? "pointer-events-none opacity-40" : ""
       }`}
     >
-      <Link to={`/workspace/${workspaceId}/board/${board.id}`} className="block">
+      <Link to={`/workspaces/${workspaceId}/board/${board.id}`} className="block">
         <div className={`h-20 bg-gradient-to-br ${coverFor(board.name)}`} />
         <div className="p-5">
           <h3 className="truncate text-base font-semibold text-white">{board.name}</h3>
