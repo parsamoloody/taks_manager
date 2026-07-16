@@ -3,6 +3,7 @@ interface AvatarProps {
   name: string;
   src?: string | null;
   size?: "sm" | "md" | "lg";
+  fullRound?: boolean;
 }
 
 const SIZE_MAP = {
@@ -24,7 +25,7 @@ function colorFor(name: string) {
   return COLORS[index];
 }
 
-export function Avatar({ name, src, size = "md" }: AvatarProps) {
+export function Avatar({ name, src, size = "md", fullRound }: AvatarProps) {
   const initials = name
     .split(" ")
     .map((part) => part[0])
@@ -37,7 +38,7 @@ export function Avatar({ name, src, size = "md" }: AvatarProps) {
       <img
         src={src}
         alt={name}
-        className={`${SIZE_MAP[size]} rounded-2xl object-cover ring-1 ring-white/10`}
+        className={`${SIZE_MAP[size]} ${(fullRound ? 'rounded-full' : 'rounded-2xl')} object-cover ring-1 ring-white/10`}
       />
     );
   }
