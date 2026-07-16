@@ -2,7 +2,7 @@
 import { Link, useFetcher } from "react-router";
 import { Avatar } from "~/components/ui/Avatar";
 import type { Workspace } from "~/lib/api/workspace";
-
+import  {} from '@repo/shared'
 interface WorkspaceCardProps {
     workspace: Workspace;
 }
@@ -19,20 +19,31 @@ export function WorkspaceCard({ workspace }: WorkspaceCardProps) {
             <Link to={`/workspaces/${workspace.id}`} className="block">
                 <div className="flex items-start justify-between">
                     <Avatar name={workspace.name} src={workspace.logo} size="lg" />
-                    <span className="rounded-full bg-white/5 px-2.5 py-1 text-xs text-slate-400">
-                        {workspace.members.length} member{workspace.members.length === 1 ? "" : "s"}
-                    </span>
+                    {
+                        <div className="flex items-center">
+                            {workspace.members.map((u, index) => (
+                                <div
+                                    key={u.userId}
+                                    className={index > 0 ? "-ml-4" : ""}
+                                >
+                                    <Avatar
+                                        name={workspace.name}
+                                        src={"/assets/user/user.png"}
+                                        size="sm"
+                                        fullRound
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    }
                 </div>
 
                 <h3 className="mt-4 truncate text-base font-semibold text-white">
                     {workspace.name}
                 </h3>
-                <p className="mt-1 text-sm text-slate-400">
-                    Updated {new Date(workspace.updatedAt).toLocaleDateString()}
-                </p>
             </Link>
 
-            <fetcher.Form method="post" className="absolute right-4 top-4">
+            <fetcher.Form method="post" className="absolute right-4 bottom-4">
                 <input type="hidden" name="intent" value="delete" />
                 <input type="hidden" name="workspaceId" value={workspace.id} />
                 <button
