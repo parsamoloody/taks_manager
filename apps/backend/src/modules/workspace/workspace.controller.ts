@@ -29,7 +29,6 @@ export class WorkspaceController {
   @ApiOperation({ summary: 'List workspaces for the current user' })
   findAll(@GetUser() user: User, @Req() req: Request) {
 
-    console.log("Incomming request headers:", req.headers.authorization)
     return this.workspaceService.findAll(user.id);
   }
 
