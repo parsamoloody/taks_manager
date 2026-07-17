@@ -54,7 +54,6 @@ export async function action({ request }: Route.ActionArgs) {
 export default function WorkspacesPage() {
   const { workspaces } = useLoaderData<typeof loader>();
   const [isCreateOpen, setCreateOpen] = useState(false);
-
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-10 text-white sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl space-y-8">

@@ -1,7 +1,7 @@
 // app/routes/workspace.$workspaceId.tsx
 import { useState } from "react";
-import { useLoaderData } from "react-router";
-import { getWorkspaces } from "~/lib/api/workspace";
+import { redirect, useFetcher, useLoaderData } from "react-router";
+import { deleteWorkspace, getWorkspaces } from "~/lib/api/workspace";
 import {
   getBoards,
   createBoard,
@@ -15,8 +15,11 @@ import { requireAccessToken } from "~/lib/api/auth.server";
 import { Breadcrumb } from "~/components/ui/BreadCriumb";
 import { EmptyBoardState } from "~/components/board/EmptyBoard";
 import type { Route } from "./+types/workspace.$workspaceId";
-import type {  CreateBoardDto } from "@repo/shared";
+import type { CreateBoardDto } from "@repo/shared";
 import { BoardVisibility } from "@repo/shared";
+import { KebabMenu } from "~/components/ui/KebabMenu";
+import { HiOutlinePencil, HiOutlineTrash } from "react-icons/hi";
+import { DeleteWorkspaceDialog } from "~/components/workspace/DeleteWorkspaceDialog";
 
 export function meta({ data }: Route.MetaArgs) {
   return [{ title: `${data?.workspaceName ?? "Workspace"} · Tsk Manager` }];
@@ -45,7 +48,10 @@ export async function action({ request, params }: Route.ActionArgs) {
   const workspaceId = params.workspaceId!;
   const formData = await request.formData();
   const intent = formData.get("intent");
+  const target = formData.get("target");
 
+
+  console.log("params:", params)
   try {
     if (intent === "create") {
       const payload: CreateBoardDto = {
@@ -53,6 +59,11 @@ export async function action({ request, params }: Route.ActionArgs) {
         visibility: BoardVisibility.WORKSPACE,
       };
       await createBoard(token, workspaceId, payload);
+      return { ok: true };
+    }
+
+    if (intent === "delete" && target === 'workspace') {
+      await deleteWorkspace(token, workspaceId)
       return { ok: true };
     }
 
@@ -71,7 +82,10 @@ export async function action({ request, params }: Route.ActionArgs) {
 export default function WorkspaceBoardsPage() {
   const { workspaceId, workspaceName, boards } = useLoaderData<typeof loader>();
   const [isCreateOpen, setCreateOpen] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
+  const fetcher = useFetcher();
+  const isDeleting = fetcher.state !== "idle" && fetcher.formData?.get("workspaceId") === workspaceId;
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-10 text-white sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl space-y-8">
@@ -85,9 +99,29 @@ export default function WorkspaceBoardsPage() {
 
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <h1 className="text-2xl font-semibold text-white sm:text-3xl">{workspaceName}</h1>
-            <Button variant="primary" onClick={() => setCreateOpen(true)} className="self-start sm:self-auto">
-              + New board
-            </Button>
+            <div className="flex gap-x-2">
+              <Button variant="primary" onClick={() => setCreateOpen(true)} className="self-start sm:self-auto">
+                + New board
+              </Button>
+              <div className="flex items-center gap-1 w-auto">
+                <KebabMenu
+                  label={`List options for ${workspaceId}`}
+                  items={[
+                    {
+                      label: "Edit workspace",
+                      onClick: () => { },
+                      icon: <HiOutlinePencil className="h-4 w-4" />
+                    },
+                    {
+                      label: "Delete workspace",
+                      icon: <HiOutlineTrash className="h-4 w-4" />,
+                      variant: "danger",
+                      onClick: () => setOpenDeleteDialog(true)
+                    },
+                  ]}
+                />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -98,6 +132,7 @@ export default function WorkspaceBoardsPage() {
         )}
       </div>
 
+      <DeleteWorkspaceDialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)} workspaceName={workspaceId} workspaceId={workspaceId} />
       <CreateBoardDialog open={isCreateOpen} onClose={() => setCreateOpen(false)} />
     </main>
   );

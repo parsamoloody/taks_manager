@@ -1,4 +1,3 @@
-// app/components/workspace/CreateWorkspaceDialog.tsx
 import { useEffect, useRef } from "react";
 import { useFetcher } from "react-router";
 import { Modal } from "~/components/ui/Modal";
