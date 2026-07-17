@@ -1,10 +1,11 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { CreateOrUpdateWorkspaceDto } from './dto/workspace.dto';
 import { GetUser } from 'src/common/decorator';
 import type { User } from '@prisma/client';
 import { WorkspaceService } from './workspace.service';
 import { JwtGuard } from 'src/guard';
+import type { Request } from 'express';
 
 @ApiTags('Workspaces')
 @ApiBearerAuth()
@@ -26,7 +27,9 @@ export class WorkspaceController {
   @UseGuards(JwtGuard)
   @Get()
   @ApiOperation({ summary: 'List workspaces for the current user' })
-  findAll(@GetUser() user: User) {
+  findAll(@GetUser() user: User, @Req() req: Request) {
+
+    console.log("Incomming request headers:", req.headers.authorization)
     return this.workspaceService.findAll(user.id);
   }
 
@@ -49,6 +52,6 @@ export class WorkspaceController {
     @GetUser() user: User,
     @Param("workspaceId") workspaceId: string
   ) {
-    return this.workspaceService.remove(user.id, workspaceId);
+    return this.workspaceService.remove(workspaceId, user.id);
   }
 }
