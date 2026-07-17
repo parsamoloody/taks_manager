@@ -1,4 +1,5 @@
 // app/components/board/BoardCard.tsx
+import { HiOutlineTrash } from "react-icons/hi";
 import { Link, useFetcher } from "react-router";
 import type { Board } from "~/lib/api/board";
 
@@ -28,9 +29,8 @@ export function BoardCard({ board, workspaceId }: BoardCardProps) {
 
   return (
     <div
-      className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 transition hover:border-sky-400/30 hover:bg-white/10 ${
-        isDeleting ? "pointer-events-none opacity-40" : ""
-      }`}
+      className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 transition hover:border-sky-400/30 hover:bg-white/10 ${isDeleting ? "pointer-events-none opacity-40" : ""
+        }`}
     >
       <Link to={`/workspaces/${workspaceId}/board/${board.id}`} className="block">
         <div className={`h-20 bg-gradient-to-br ${coverFor(board.name)}`} />
@@ -42,7 +42,7 @@ export function BoardCard({ board, workspaceId }: BoardCardProps) {
         </div>
       </Link>
 
-      <fetcher.Form method="post" className="absolute right-3 top-3">
+      <fetcher.Form method="delete" className="absolute right-3 top-3">
         <input type="hidden" name="intent" value="delete" />
         <input type="hidden" name="boardId" value={board.id} />
         <button
@@ -53,9 +53,9 @@ export function BoardCard({ board, workspaceId }: BoardCardProps) {
             }
           }}
           aria-label={`Delete ${board.name}`}
-          className="hidden rounded-full bg-slate-950/60 p-1.5 text-slate-300 opacity-0 backdrop-blur transition hover:bg-rose-500/30 hover:text-rose-200 group-hover:opacity-100 sm:block"
+          className="hidden cursor-pointer rounded-full bg-slate-950/60 p-1.5 text-slate-300 opacity-0 backdrop-blur transition hover:bg-rose-500/30 hover:text-rose-200 group-hover:opacity-100 sm:block"
         >
-          🗑
+          <HiOutlineTrash className="h-4 w-4" />
         </button>
       </fetcher.Form>
     </div>

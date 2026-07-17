@@ -1,15 +1,16 @@
 // app/components/ui/Modal.tsx
 import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
+import { IoCloseOutline } from "react-icons/io5";
 
 interface ModalProps {
   open: boolean;
   onClose: () => void;
-  name: string;
+  title: string;
   children: ReactNode;
 }
 
-export function Modal({ open, onClose, name, children }: ModalProps) {
+export function Modal({ open, onClose, title, children }: ModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -33,17 +34,17 @@ export function Modal({ open, onClose, name, children }: ModalProps) {
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
-        aria-label={name}
+        aria-label={title}
         className="w-full max-w-md rounded-[28px] border border-white/10 bg-slate-900 p-6 shadow-2xl sm:p-8"
       >
         <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-white">{name}</h2>
+          <h2 className="text-lg font-semibold text-white">{title}</h2>
           <button
             onClick={onClose}
             aria-label="Close"
             className="rounded-full p-1.5 text-slate-400 transition hover:bg-white/10 hover:text-white"
           >
-            ✕
+            <IoCloseOutline size={24} />
           </button>
         </div>
         {children}

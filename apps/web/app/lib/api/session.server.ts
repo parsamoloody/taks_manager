@@ -1,4 +1,3 @@
-// app/lib/session.server.ts
 import { createCookieSessionStorage } from "react-router";
 
 const sessionSecret = process.env.SESSION_SECRET;

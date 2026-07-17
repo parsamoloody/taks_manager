@@ -1,4 +1,3 @@
-// app/routes/board/board.$boardId.tsx
 import { useState } from "react";
 import { useLoaderData } from "react-router";
 import { requireAccessToken } from "~/lib/api/auth.server";
