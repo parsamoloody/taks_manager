@@ -67,12 +67,6 @@ export async function action({ request, params }: Route.ActionArgs) {
       return { ok: true };
     }
 
-    if (intent === "delete") {
-      const boardId = String(formData.get("boardId"));
-      await deleteBoard(token, workspaceId, boardId);
-      return { ok: true };
-    }
-
     return { ok: false, message: "Unknown action" };
   } catch (error) {
     return { ok: false, message: getErrorMessage(error) };

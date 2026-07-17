@@ -41,23 +41,6 @@ export function BoardCard({ board, workspaceId }: BoardCardProps) {
           </p>
         </div>
       </Link>
-
-      <fetcher.Form method="delete" className="absolute right-3 top-3">
-        <input type="hidden" name="intent" value="delete" />
-        <input type="hidden" name="boardId" value={board.id} />
-        <button
-          type="submit"
-          onClick={(e) => {
-            if (!confirm(`Delete "${board.name}"? This can't be undone.`)) {
-              e.preventDefault();
-            }
-          }}
-          aria-label={`Delete ${board.name}`}
-          className="hidden cursor-pointer rounded-full bg-slate-950/60 p-1.5 text-slate-300 opacity-0 backdrop-blur transition hover:bg-rose-500/30 hover:text-rose-200 group-hover:opacity-100 sm:block"
-        >
-          <HiOutlineTrash className="h-4 w-4" />
-        </button>
-      </fetcher.Form>
     </div>
   );
 }
