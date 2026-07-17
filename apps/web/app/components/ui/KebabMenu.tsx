@@ -45,16 +45,16 @@ export function KebabMenu({ items, label = "Open menu" }: KebabMenuProps) {
         aria-label={label}
         aria-expanded={open}
         onClick={() => setOpen((prev) => !prev)}
-        className="rounded-full p-1 text-slate-400 opacity-0 transition hover:bg-white/10 hover:text-white group-hover:opacity-100 [.group:hover_&]:opacity-100 data-[open=true]:opacity-100"
+        className="cursor-pointer rounded-full p-1 text-slate-400 transition hover:bg-white/10 "
         data-open={open}
       >
-        <HiDotsVertical className="h-4 w-4" />
+        <HiDotsVertical size={16} />
       </button>
 
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-full z-20 mt-1 w-40 overflow-hidden rounded-xl border border-white/10 bg-slate-900 py-1 shadow-xl"
+          className="absolute right-0 top-full z-20 mt-1 w-44 overflow-hidden rounded-xl border border-white/10 bg-slate-900 py-1 shadow-xl"
         >
           {items.map((item) => (
             <button
@@ -65,7 +65,7 @@ export function KebabMenu({ items, label = "Open menu" }: KebabMenuProps) {
                 setOpen(false);
                 item.onClick();
               }}
-              className={`flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm transition ${
+              className={`cursor-pointer flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm transition ${
                 item.variant === "danger"
                   ? "text-rose-400 hover:bg-rose-500/10"
                   : "text-slate-200 hover:bg-white/5"
