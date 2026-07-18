@@ -34,7 +34,7 @@ export function DeleteWorkspaceDialog({ open, onClose, workspaceId }: DeleteWork
                             Cancel
                         </Button>
                         <Button disabled={isSubmitting} type="submit" variant="danger" isLoading={isSubmitting}>
-                            yes
+                            Yes
                         </Button>
                     </div>
 

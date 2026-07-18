@@ -11,7 +11,7 @@ export function WorkspaceCard({ workspace }: WorkspaceCardProps) {
     const isDeleting = fetcher.state !== "idle" && fetcher.formData?.get("workspaceId") === workspace.id;
     return (
         <div
-            className={`group relative rounded-3xl border border-white/10 bg-white/5 p-5 transition hover:border-sky-400/30 hover:bg-white/10 ${isDeleting ? "pointer-events-none opacity-40" : ""
+            className={`group relative rounded-lg border border-white/10 bg-white/5 p-5 transition hover:border-sky-400/30 hover:bg-white/10 ${isDeleting ? "pointer-events-none opacity-40" : ""
                 }`}
         >
             <Link to={`/workspaces/${workspace.id}`} className="block">

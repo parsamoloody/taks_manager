@@ -36,7 +36,7 @@ export function CreateWorkspaceDialog({ open, onClose }: CreateWorkspaceDialogPr
             minLength={1}
             maxLength={50}
             placeholder="Product Team"
-            className="w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-sky-400/50 focus:outline-none focus:ring-2 focus:ring-sky-400/20"
+            className="w-full rounded-md border border-white/10 bg-slate-950/60 px-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-sky-400/50 focus:outline-none focus:ring-2 focus:ring-sky-400/20"
           />
         </div>
 
@@ -49,7 +49,7 @@ export function CreateWorkspaceDialog({ open, onClose }: CreateWorkspaceDialogPr
             name="logo"
             type="url"
             placeholder="https://example.com/logo.png"
-            className="w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-sky-400/50 focus:outline-none focus:ring-2 focus:ring-sky-400/20"
+            className="w-full rounded-md border border-white/10 bg-slate-950/60 px-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-sky-400/50 focus:outline-none focus:ring-2 focus:ring-sky-400/20"
           />
         </div>
 
