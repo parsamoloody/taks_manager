@@ -1,5 +1,3 @@
-// app/components/board/BoardCard.tsx
-import { HiOutlineTrash } from "react-icons/hi";
 import { Link, useFetcher } from "react-router";
 import type { Board } from "~/lib/api/board";
 
@@ -11,7 +9,6 @@ const COVER_COLORS = [
   "from-rose-500/30 to-rose-500/5",
 ];
 
-// app/components/board/BoardCard.tsx
 function coverFor(title: string) {
   const safeTitle = title || "?";
   const index = safeTitle.charCodeAt(0) % COVER_COLORS.length;
