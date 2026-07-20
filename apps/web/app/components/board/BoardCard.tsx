@@ -1,6 +1,7 @@
 import { Link, useFetcher } from "react-router";
 import type { Board } from "~/lib/api/board";
 import { GroupMembers } from "~/components/ui/GroutMembers";
+import { Badge } from "../ui/Badge";
 
 const COVER_COLORS = [
   "from-sky-500/30 to-sky-500/5",
@@ -29,11 +30,15 @@ export function BoardCard({ board, workspaceId }: BoardCardProps) {
     avatar: user.avatar,
     name: [user.firstName, user.lastName].filter(Boolean).join(" ") || "User",
   }));
+  console.log(board)
   return (
     <div
       className={`group relative overflow-hidden rounded-md border border-white/10 bg-white/5 transition hover:border-sky-400/30 hover:bg-white/10 ${isDeleting ? "pointer-events-none opacity-40" : ""
         }`}
     >
+      {board.visibility === 'PRIVATE' && (
+        <Badge>Private</Badge>
+      )}
       <Link to={`/workspaces/${workspaceId}/board/${board.id}`} className="block">
         <div className={`h-20 bg-gradient-to-br ${coverFor(board.name)}`} />
         <div className="p-5">

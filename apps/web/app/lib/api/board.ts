@@ -9,6 +9,7 @@ export interface Board {
     order: number;
     createdAt: string;
     updatedAt: string;
+    visibility: 'PRIVATE' | 'WORKSPACE'
     members: {
         userId: string;
         joinedAt: string;
