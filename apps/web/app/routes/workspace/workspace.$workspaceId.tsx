@@ -1,7 +1,13 @@
 // app/routes/workspace.$workspaceId.tsx
 import { useState } from "react";
 import { redirect, useFetcher, useLoaderData } from "react-router";
-import { deleteWorkspace, getWorkspaces } from "~/lib/api/workspace";
+import {
+  addWorkspaceMember,
+  deleteWorkspace,
+  getWorkspaces,
+  removeWorkspaceMember,
+  updateWorkspace,
+} from "~/lib/api/workspace";
 import {
   getBoards,
   createBoard,
@@ -20,6 +26,8 @@ import { BoardVisibility } from "@repo/shared";
 import { KebabMenu } from "~/components/ui/KebabMenu";
 import { HiOutlinePencil, HiOutlineTrash } from "react-icons/hi";
 import { DeleteWorkspaceDialog } from "~/components/workspace/DeleteWorkspaceDialog";
+import { EditWorkspaceDialog } from "~/components/workspace/EditWorkspaceDialog";
+import type { CreateOrUpdateWorkspaceDto } from "@repo/shared";
 
 export function meta({ data }: Route.MetaArgs) {
   return [{ title: `${data?.workspaceName ?? "Workspace"} · Tsk Manager` }];
@@ -39,6 +47,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   return {
     workspaceId,
     workspaceName: workspace?.name ?? "Workspace",
+    workspace,
     boards,
   };
 }
@@ -67,6 +76,27 @@ export async function action({ request, params }: Route.ActionArgs) {
       return { ok: true };
     }
 
+    if (intent === "update-workspace") {
+      const payload: CreateOrUpdateWorkspaceDto = {
+        name: String(formData.get("name") ?? "").trim(),
+        logo: String(formData.get("logo") ?? "").trim(),
+      };
+      await updateWorkspace(token, workspaceId, payload);
+      return { ok: true, intent };
+    }
+
+    if (intent === "add-member") {
+      await addWorkspaceMember(token, workspaceId, {
+        email: String(formData.get("email") ?? "").trim(),
+      });
+      return { ok: true, intent };
+    }
+
+    if (intent === "remove-member") {
+      await removeWorkspaceMember(token, workspaceId, String(formData.get("userId") ?? ""));
+      return { ok: true, intent };
+    }
+
     return { ok: false, message: "Unknown action" };
   } catch (error) {
     return { ok: false, message: getErrorMessage(error) };
@@ -74,9 +104,10 @@ export async function action({ request, params }: Route.ActionArgs) {
 }
 
 export default function WorkspaceBoardsPage() {
-  const { workspaceId, workspaceName, boards } = useLoaderData<typeof loader>();
+  const { workspaceId, workspaceName, workspace, boards } = useLoaderData<typeof loader>();
   const [isCreateOpen, setCreateOpen] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [isEditOpen, setEditOpen] = useState(false);
 
   const fetcher = useFetcher();
   const isDeleting = fetcher.state !== "idle" && fetcher.formData?.get("workspaceId") === workspaceId;
@@ -103,7 +134,7 @@ export default function WorkspaceBoardsPage() {
                   items={[
                     {
                       label: "Edit workspace",
-                      onClick: () => { },
+                      onClick: () => setEditOpen(true),
                       icon: <HiOutlinePencil className="h-4 w-4" />
                     },
                     {
@@ -127,6 +158,7 @@ export default function WorkspaceBoardsPage() {
       </div>
 
       <DeleteWorkspaceDialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)} workspaceName={workspaceId} workspaceId={workspaceId} />
+      {workspace && <EditWorkspaceDialog open={isEditOpen} onClose={() => setEditOpen(false)} workspace={workspace} />}
       <CreateBoardDialog open={isCreateOpen} onClose={() => setCreateOpen(false)} />
     </main>
   );

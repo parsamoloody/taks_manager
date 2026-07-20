@@ -35,7 +35,7 @@ export class WorkspaceService {
         await this.prisma.workspace.create({
           data: {
             name: dto.name,
-            logo: dto.logo,
+            logo: dto.logo?.trim() || null,
             members: {
               create: {
                 userId,
@@ -44,7 +44,19 @@ export class WorkspaceService {
             },
           },
           include: {
-            members: true,
+            members: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    email: true,
+                    firstName: true,
+                    lastName: true,
+                    avatar: true,
+                  },
+                },
+              },
+            },
           },
         });
 
@@ -84,10 +96,22 @@ export class WorkspaceService {
           },
           data: {
             name: dto.name,
-            logo: dto.logo,
+            logo: dto.logo?.trim() || null,
           },
           include: {
-            members: true,
+            members: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    email: true,
+                    firstName: true,
+                    lastName: true,
+                    avatar: true,
+                  },
+                },
+              },
+            },
           },
         });
 
@@ -118,7 +142,19 @@ export class WorkspaceService {
             },
           },
           include: {
-            members: true,
+            members: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    email: true,
+                    firstName: true,
+                    lastName: true,
+                    avatar: true,
+                  },
+                },
+              },
+            },
           },
         },
       );

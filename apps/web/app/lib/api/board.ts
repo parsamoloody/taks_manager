@@ -22,6 +22,7 @@ export interface MemberUser {
     firstName: string | null;
     lastName: string | null;
     avatar: string | null;
+    email?: string;
 }
 
 export function getBoards(token: string, workspaceId: string) {
