@@ -14,8 +14,9 @@ import { UpdateBoardDto } from './dto/update_board.dto';
 @Injectable()
 export class BoardService {
     private readonly logger = new Logger(BoardService.name);
-
-    constructor(private prisma: PrismaService) { }
+    constructor(
+        private prisma: PrismaService,
+    ) { }
 
     async create(
         workspaceId: string,
@@ -108,6 +109,20 @@ export class BoardService {
                 orderBy: {
                     createdAt: 'asc',
                 },
+                include: {
+                    members: {
+                        include: {
+                            user: {
+                                select: {
+                                    id: true,
+                                    firstName: true,
+                                    lastName: true,
+                                    avatar: true,
+                                },
+                            },
+                        },
+                    },
+                }
             });
 
             this.logger.log(
@@ -161,6 +176,18 @@ export class BoardService {
                     ],
                 },
                 include: {
+                    members: {
+                        include: {
+                            user: {
+                                select: {
+                                    id: true,
+                                    firstName: true,
+                                    lastName: true,
+                                    avatar: true,
+                                },
+                            },
+                        },
+                    },
                     lists: {
                         orderBy: {
                             createdAt: 'asc',
