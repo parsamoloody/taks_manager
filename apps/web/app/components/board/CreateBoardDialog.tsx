@@ -22,7 +22,7 @@ export function CreateBoardDialog({ open, onClose }: CreateBoardDialogProps) {
   }, [fetcher.state, fetcher.data, onClose]);
 
   return (
-    <Modal open={open} onClose={onClose} name="Create board">
+    <Modal open={open} onClose={onClose} title="Create board">
       <fetcher.Form ref={formRef} method="post" className="space-y-4">
         <input type="hidden" name="intent" value="create" />
 
@@ -37,7 +37,7 @@ export function CreateBoardDialog({ open, onClose }: CreateBoardDialogProps) {
             minLength={1}
             maxLength={50}
             placeholder="Sprint 1"
-            className="w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-sky-400/50 focus:outline-none focus:ring-2 focus:ring-sky-400/20"
+            className="w-full rounded-md border border-white/10 bg-slate-950/60 px-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-sky-400/50 focus:outline-none focus:ring-2 focus:ring-sky-400/20"
           />
         </div>
 

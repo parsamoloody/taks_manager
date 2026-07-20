@@ -9,6 +9,19 @@ export interface Board {
     order: number;
     createdAt: string;
     updatedAt: string;
+    members: {
+        userId: string;
+        joinedAt: string;
+        boardId: string;
+        user: MemberUser;
+    }[];
+}
+
+export interface MemberUser {
+    id: string;
+    firstName: string | null;
+    lastName: string | null;
+    avatar: string | null;
 }
 
 export function getBoards(token: string, workspaceId: string) {

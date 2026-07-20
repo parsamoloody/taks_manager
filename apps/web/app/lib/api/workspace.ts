@@ -1,12 +1,14 @@
 // app/lib/api/workspace.ts
 import type { CreateOrUpdateWorkspaceDto } from "@repo/shared";
 import { requestJson } from "./client";
+import type { MemberUser } from "./board";
 
 export interface WorkspaceMember {
   workspaceId: string;
   userId: string;
   role: "OWNER" | "ADMIN" | "MEMBER" | string;
   joinedAt: string;
+  user: MemberUser;
 }
 
 export interface Workspace {
