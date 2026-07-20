@@ -61,6 +61,10 @@ export class BoardService {
                 },
             });
 
+            if (board.visibility !== 'PRIVATE') {
+                await this.syncBoardMembers(board.id, workspaceId);
+            }
+
             this.logger.log(
                 `Board created successfully: ${board.id} by user: ${userId}`,
             );
@@ -261,6 +265,10 @@ export class BoardService {
                 data: dto,
             });
 
+            if (updatedBoard.visibility !== 'PRIVATE') {
+                await this.syncBoardMembers(updatedBoard.id, updatedBoard.workspaceId);
+            }
+
             this.logger.log(
                 `Board updated successfully: ${boardId} by user: ${userId}`,
             );
@@ -358,6 +366,30 @@ export class BoardService {
                 'Failed to verify workspace membership',
             );
         }
+    }
+
+    private async syncBoardMembers(
+        boardId: string,
+        workspaceId: string,
+    ): Promise<void> {
+        const workspaceMembers = await this.prisma.workspaceMember.findMany({
+            where: { workspaceId },
+            select: { userId: true },
+        });
+        const userIds = workspaceMembers.map((member) => member.userId);
+
+        await this.prisma.$transaction([
+            this.prisma.boardMember.deleteMany({
+                where: {
+                    boardId,
+                    userId: { notIn: userIds },
+                },
+            }),
+            this.prisma.boardMember.createMany({
+                data: userIds.map((userId) => ({ boardId, userId })),
+                skipDuplicates: true,
+            }),
+        ]);
     }
 
     private handleError(error: unknown, context: string): never {

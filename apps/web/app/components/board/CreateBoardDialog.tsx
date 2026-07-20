@@ -41,6 +41,21 @@ export function CreateBoardDialog({ open, onClose }: CreateBoardDialogProps) {
           />
         </div>
 
+        <div>
+          <label htmlFor="visibility" className="mb-1.5 block text-sm font-medium text-slate-300">
+            Visibility
+          </label>
+          <select
+            id="visibility"
+            name="visibility"
+            defaultValue="WORKSPACE"
+            className="w-full rounded-md border border-white/10 bg-slate-950/60 px-4 py-2.5 text-sm text-white focus:border-sky-400/50 focus:outline-none focus:ring-2 focus:ring-sky-400/20"
+          >
+            <option value="WORKSPACE">Public — all workspace members</option>
+            <option value="PRIVATE">Private — board members only</option>
+          </select>
+        </div>
+
         {fetcher.data && !fetcher.data.ok && (
           <p className="text-sm text-rose-400">{fetcher.data.message}</p>
         )}

@@ -89,6 +89,8 @@ export class WorkspaceMembersService {
         },
       );
 
+      await this.syncWorkspaceBoardMembers(workspaceId);
+
       this.logger.log(
         `User ${user.id} added to workspace ${workspaceId}`,
       );
@@ -253,6 +255,8 @@ export class WorkspaceMembersService {
         },
       });
 
+      await this.syncWorkspaceBoardMembers(workspaceId);
+
       this.logger.log(
         `User ${userId} removed from workspace ${workspaceId}`,
       );
@@ -319,6 +323,38 @@ export class WorkspaceMembersService {
         'Failed to verify workspace ownership',
       );
     }
+  }
+
+  private async syncWorkspaceBoardMembers(workspaceId: string): Promise<void> {
+    const [workspaceMembers, boards] = await Promise.all([
+      this.prisma.workspaceMember.findMany({
+        where: { workspaceId },
+        select: { userId: true },
+      }),
+      this.prisma.board.findMany({
+        where: {
+          workspaceId,
+          visibility: { not: 'PRIVATE' },
+        },
+        select: { id: true },
+      }),
+    ]);
+    const userIds = workspaceMembers.map((member) => member.userId);
+
+    await this.prisma.$transaction(
+      boards.flatMap((board) => [
+        this.prisma.boardMember.deleteMany({
+          where: {
+            boardId: board.id,
+            userId: { notIn: userIds },
+          },
+        }),
+        this.prisma.boardMember.createMany({
+          data: userIds.map((userId) => ({ boardId: board.id, userId })),
+          skipDuplicates: true,
+        }),
+      ]),
+    );
   }
 
   private handleError(error: unknown, context: string): never {

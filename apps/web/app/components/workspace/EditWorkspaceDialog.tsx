@@ -15,7 +15,7 @@ interface EditWorkspaceDialogProps {
 type ActionResult = { ok: boolean; intent?: string; message?: string };
 
 function memberName(member: Workspace["members"][number]) {
-  return [member.user.firstName, member.user.lastName].filter(Boolean).join(" ") || member.user.email || "User";
+  return [member.user.firstName, member.user.lastName].filter(Boolean).join(" ") || "unknown name";
 }
 
 export function EditWorkspaceDialog({ open, onClose, workspace }: EditWorkspaceDialogProps) {

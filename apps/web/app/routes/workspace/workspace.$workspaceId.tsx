@@ -65,7 +65,9 @@ export async function action({ request, params }: Route.ActionArgs) {
     if (intent === "create") {
       const payload: CreateBoardDto = {
         name: String(formData.get("name") ?? "").trim(),
-        visibility: BoardVisibility.WORKSPACE,
+        visibility: formData.get("visibility") === BoardVisibility.PRIVATE
+          ? BoardVisibility.PRIVATE
+          : BoardVisibility.WORKSPACE,
       };
       await createBoard(token, workspaceId, payload);
       return { ok: true };
