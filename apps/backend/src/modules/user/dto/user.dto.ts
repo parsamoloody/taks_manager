@@ -1,15 +1,40 @@
-import type { User } from '@repo/shared';
-import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import type { UpdateUserDto as SharedUpdateUserDto } from '@repo/shared';
+import {
+  IsEmail,
+  IsOptional,
+  IsString,
+  IsUrl,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
-export class UserDto implements User {
-  @ApiProperty({ example: 'user@example.com' })
-  @IsEmail()
-  @IsNotEmpty()
-  email: string;
+export class UpdateUserDto implements SharedUpdateUserDto {
+  @ApiPropertyOptional({ example: 'Jane' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  firstName?: string;
 
-  @ApiProperty({ example: 'strongPassword123' })
+  @ApiPropertyOptional({ example: 'Doe' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  lastName?: string;
+
+  @ApiPropertyOptional({ example: 'jane@example.com' })
+  @IsOptional()
   @IsEmail()
-  @IsNotEmpty()
-  password: string;
+  email?: string;
+
+  @ApiPropertyOptional({ example: 'https://example.com/avatar.jpg' })
+  @IsOptional()
+  @IsUrl()
+  avatar?: string;
+
+  @ApiPropertyOptional({ example: 'strongPassword123', minLength: 8 })
+  @IsOptional()
+  @IsString()
+  @MinLength(8)
+  password?: string;
 }
