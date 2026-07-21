@@ -12,7 +12,6 @@ import {
 } from "~/lib/api/task";
 import { getErrorMessage } from "~/lib/api/client";
 import { TaskStatus, type UpdateListDto } from "@repo/shared";
-import { Breadcrumb } from "~/components/ui/BreadCriumb";
 import { ListColumn } from "~/components/board/ListColumn";
 import { CreateListForm } from "~/components/board/CreateListForm";
 import { CreateTaskDialog } from "~/components/board/CreateTaskDialog";
@@ -135,23 +134,13 @@ export async function action({ request, params }: Route.ActionArgs) {
 }
 
 export default function BoardPage() {
-    const { workspaceId, lists, tasksByList } = useLoaderData<typeof loader>();
+    const { lists, tasksByList } = useLoaderData<typeof loader>();
     const [createTaskListId, setCreateTaskListId] = useState<string | null>(null);
     const [activeTask, setActiveTask] = useState<Task | null>(null);
     const [editingList, setEditingList] = useState<UpdateListDto | null>(null);
 
     return (
         <main className="flex min-h-screen flex-col bg-slate-950 text-white">
-            <div className="border-b border-white/10 px-4 py-5 sm:px-6 lg:px-8">
-                <Breadcrumb
-                    items={[
-                        { label: "Workspaces", to: "/workspaces" },
-                        { label: "Workspace", to: `/workspaces/${workspaceId}` },
-                        { label: "Board" },
-                    ]}
-                />
-            </div>
-
             <div className="flex-1 overflow-x-auto px-4 py-6 sm:px-6 lg:px-8">
                 <div className="flex gap-4">
                     {lists.map((list) => (

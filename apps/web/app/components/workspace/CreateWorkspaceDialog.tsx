@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useFetcher } from "react-router";
 import { Modal } from "~/components/ui/Modal";
 import { Button } from "~/components/ui/Button";
+import { FormInput } from "~/components/ui/FormField";
 
 interface CreateWorkspaceDialogProps {
   open: boolean;
@@ -25,33 +26,22 @@ export function CreateWorkspaceDialog({ open, onClose }: CreateWorkspaceDialogPr
       <fetcher.Form ref={formRef} method="post" className="space-y-4">
         <input type="hidden" name="intent" value="create" />
 
-        <div>
-          <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-slate-300">
-            Workspace name
-          </label>
-          <input
-            id="name"
+        <FormInput
             name="name"
+            label="Workspace name"
             required
             minLength={1}
             maxLength={50}
             placeholder="Product Team"
-            className="w-full rounded-md border border-white/10 bg-slate-950/60 px-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-sky-400/50 focus:outline-none focus:ring-2 focus:ring-sky-400/20"
           />
-        </div>
 
-        <div>
-          <label htmlFor="logo" className="mb-1.5 block text-sm font-medium text-slate-300">
-            Logo URL <span className="text-slate-500">(optional)</span>
-          </label>
-          <input
-            id="logo"
+        <FormInput
             name="logo"
+            label="Logo URL"
+            optional
             type="url"
             placeholder="https://example.com/logo.png"
-            className="w-full rounded-md border border-white/10 bg-slate-950/60 px-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-sky-400/50 focus:outline-none focus:ring-2 focus:ring-sky-400/20"
           />
-        </div>
 
         {fetcher.data && !fetcher.data.ok && (
           <p className="text-sm text-rose-400">{fetcher.data.message}</p>

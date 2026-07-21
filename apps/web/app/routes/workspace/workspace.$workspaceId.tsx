@@ -18,7 +18,6 @@ import { Button } from "~/components/ui/Button";
 import { BoardGrid } from "~/components/board/BoardGrid";
 import { CreateBoardDialog } from "~/components/board/CreateBoardDialog";
 import { requireAccessToken } from "~/lib/api/auth.server";
-import { Breadcrumb } from "~/components/ui/BreadCriumb";
 import { EmptyBoardState } from "~/components/board/EmptyBoard";
 import type { Route } from "./+types/workspace.$workspaceId";
 import type { CreateBoardDto } from "@repo/shared";
@@ -60,7 +59,6 @@ export async function action({ request, params }: Route.ActionArgs) {
   const target = formData.get("target");
 
 
-  console.log("params:", params)
   try {
     if (intent === "create") {
       const payload: CreateBoardDto = {
@@ -112,18 +110,11 @@ export default function WorkspaceBoardsPage() {
   const [isEditOpen, setEditOpen] = useState(false);
 
   const fetcher = useFetcher();
-  const isDeleting = fetcher.state !== "idle" && fetcher.formData?.get("workspaceId") === workspaceId;
+  // const isDeleting = fetcher.state !== "idle" && fetcher.formData?.get("workspaceId") === workspaceId;
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-10 text-white sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl space-y-8">
-        <div className="space-y-4 border-b border-white/10 pb-6">
-          <Breadcrumb
-            items={[
-              { label: "Workspaces", to: "/workspaces" },
-              { label: workspaceName },
-            ]}
-          />
-
+        <div className=" border-white/10 pb-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <h1 className="text-2xl font-semibold text-white sm:text-3xl">{workspaceName}</h1>
             <div className="flex gap-x-2">

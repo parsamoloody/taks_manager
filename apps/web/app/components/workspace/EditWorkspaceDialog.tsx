@@ -4,6 +4,7 @@ import { HiOutlineTrash } from "react-icons/hi";
 import { Avatar } from "~/components/ui/Avatar";
 import { Button } from "~/components/ui/Button";
 import { Modal } from "~/components/ui/Modal";
+import { FormInput } from "~/components/ui/FormField";
 import type { Workspace } from "~/lib/api/workspace";
 
 interface EditWorkspaceDialogProps {
@@ -36,34 +37,25 @@ export function EditWorkspaceDialog({ open, onClose, workspace }: EditWorkspaceD
         <fetcher.Form method="post" className="space-y-4">
           <input type="hidden" name="intent" value="update-workspace" />
 
-          <div>
-            <label htmlFor="workspace-name" className="mb-1.5 block text-sm font-medium text-slate-300">
-              Workspace name
-            </label>
-            <input
+          <FormInput
               id="workspace-name"
               name="name"
+              label="Workspace name"
               required
               minLength={1}
               maxLength={50}
               defaultValue={workspace.name}
-              className="w-full rounded-md border border-white/10 bg-slate-950/60 px-4 py-2.5 text-sm text-white focus:border-sky-400/50 focus:outline-none focus:ring-2 focus:ring-sky-400/20"
             />
-          </div>
 
-          <div>
-            <label htmlFor="workspace-logo" className="mb-1.5 block text-sm font-medium text-slate-300">
-              Logo URL <span className="text-slate-500">(optional)</span>
-            </label>
-            <input
+          <FormInput
               id="workspace-logo"
               name="logo"
+              label="Logo URL"
+              optional
               type="url"
               defaultValue={workspace.logo ?? ""}
               placeholder="https://example.com/logo.png"
-              className="w-full rounded-md border border-white/10 bg-slate-950/60 px-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-sky-400/50 focus:outline-none focus:ring-2 focus:ring-sky-400/20"
             />
-          </div>
 
           <div className="flex justify-end">
             <Button type="submit" variant="primary" isLoading={isSubmitting}>
@@ -78,13 +70,13 @@ export function EditWorkspaceDialog({ open, onClose, workspace }: EditWorkspaceD
 
           <fetcher.Form ref={inviteFormRef} method="post" className="mt-3 flex gap-2">
             <input type="hidden" name="intent" value="add-member" />
-            <input
+            <FormInput
               name="email"
               type="email"
               required
               placeholder="name@example.com"
               aria-label="Member email"
-              className="min-w-0 flex-1 rounded-md border border-white/10 bg-slate-950/60 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-sky-400/50 focus:outline-none focus:ring-2 focus:ring-sky-400/20"
+              wrapperClassName="min-w-0 flex-1"
             />
             <Button type="submit" variant="secondary" isLoading={isSubmitting}>Invite</Button>
           </fetcher.Form>
@@ -106,7 +98,7 @@ export function EditWorkspaceDialog({ open, onClose, workspace }: EditWorkspaceD
                       type="submit"
                       disabled={isSubmitting}
                       aria-label={`Remove ${memberName(member)}`}
-                      className="rounded p-1.5 text-slate-400 transition hover:bg-rose-500/10 hover:text-rose-300 disabled:opacity-50"
+                      className="rounded p-1.5 text-slate-400 cursor-pointer transition hover:bg-rose-500/10 hover:text-rose-300 disabled:opacity-50"
                     >
                       <HiOutlineTrash className="h-4 w-4" />
                     </button>

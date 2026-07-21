@@ -5,6 +5,7 @@ import { TaskPriority } from "@repo/shared";
 import type { Task } from "~/lib/api/task";
 import { Modal } from "~/components/ui/Modal";
 import { Button } from "~/components/ui/Button";
+import { FormInput, FormSelect, FormTextarea } from "~/components/ui/FormField";
 
 interface TaskDetailDialogProps {
   task: Task | null;
@@ -30,85 +31,63 @@ export function TaskDetailDialog({ task, onClose }: TaskDetailDialogProps) {
   if (!task) return null;
 
   return (
-    <Modal open={Boolean(task)} onClose={onClose} name="Task details">
+    <Modal open={Boolean(task)} onClose={onClose} title="Task details">
       <fetcher.Form ref={formRef} method="post" className="space-y-4">
         <input type="hidden" name="intent" value="updateTask" />
         <input type="hidden" name="taskId" value={task.id} />
         <input type="hidden" name="listId" value={task.listId} />
         <input type="hidden" name="order" value={task.order} />
 
-        <div>
-          <label htmlFor="title" className="mb-1.5 block text-sm font-medium text-slate-300">
-            Title
-          </label>
-          <input
+        <FormInput
             id="title"
             name="title"
+            label="Title"
             defaultValue={task.title}
             required
             maxLength={100}
-            className="w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-2.5 text-sm text-white focus:border-sky-400/50 focus:outline-none focus:ring-2 focus:ring-sky-400/20"
           />
-        </div>
 
-        <div>
-          <label htmlFor="description" className="mb-1.5 block text-sm font-medium text-slate-300">
-            Description
-          </label>
-          <textarea
+        <FormTextarea
             id="description"
             name="description"
+            label="Description"
+            optional
             defaultValue={task.description ?? ""}
             rows={3}
-            className="w-full resize-none rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-2.5 text-sm text-white focus:border-sky-400/50 focus:outline-none focus:ring-2 focus:ring-sky-400/20"
           />
-        </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label htmlFor="priority" className="mb-1.5 block text-sm font-medium text-slate-300">
-              Priority
-            </label>
-            <select
+          <FormSelect
               id="priority"
               name="priority"
+              label="Priority"
               defaultValue={task.priority}
-              className="w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-2.5 text-sm text-white focus:border-sky-400/50 focus:outline-none focus:ring-2 focus:ring-sky-400/20"
             >
               {Object.values(TaskPriority).map((p) => (
                 <option key={p} value={p}>
                   {p.charAt(0) + p.slice(1).toLowerCase()}
                 </option>
               ))}
-            </select>
-          </div>
+            </FormSelect>
 
-          <div>
-            <label htmlFor="dueDate" className="mb-1.5 block text-sm font-medium text-slate-300">
-              Due date
-            </label>
-            <input
+          <FormInput
               id="dueDate"
               name="dueDate"
+              label="Due date"
+              optional
               type="date"
               defaultValue={toDateInputValue(task.dueDate)}
-              className="w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-2.5 text-sm text-white focus:border-sky-400/50 focus:outline-none focus:ring-2 focus:ring-sky-400/20"
             />
-          </div>
         </div>
 
-        <div>
-          <label htmlFor="startDate" className="mb-1.5 block text-sm font-medium text-slate-300">
-            Start date
-          </label>
-          <input
+        <FormInput
             id="startDate"
             name="startDate"
+            label="Start date"
+            optional
             type="date"
             defaultValue={toDateInputValue(task.startDate)}
-            className="w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-2.5 text-sm text-white focus:border-sky-400/50 focus:outline-none focus:ring-2 focus:ring-sky-400/20"
           />
-        </div>
 
         {fetcher.data && !fetcher.data.ok && (
           <p className="text-sm text-rose-400">{fetcher.data.message}</p>

@@ -30,7 +30,6 @@ export function BoardCard({ board, workspaceId }: BoardCardProps) {
     avatar: user.avatar,
     name: [user.firstName, user.lastName].filter(Boolean).join(" ") || "User",
   }));
-  console.log(board)
   return (
     <div
       className={`group relative overflow-hidden rounded-md border border-white/10 bg-white/5 transition hover:border-sky-400/30 hover:bg-white/10 ${isDeleting ? "pointer-events-none opacity-40" : ""

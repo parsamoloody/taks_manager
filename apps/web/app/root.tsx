@@ -5,10 +5,25 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
 } from "react-router";
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import { AppHeader } from "~/components/layout/AppHeader";
+import { getAccessToken } from "~/lib/api/auth.server";
+import { getCurrentUser } from "~/lib/api/user";
+
+export async function loader({ request }: Route.LoaderArgs) {
+  const token = await getAccessToken(request);
+  if (!token) return { user: null };
+
+  try {
+    return { user: await getCurrentUser(token) };
+  } catch {
+    return { user: null };
+  }
+}
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -42,7 +57,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  const { user } = useLoaderData<typeof loader>();
+
+  return (
+    <>
+      <AppHeader user={user} />
+      <Outlet />
+    </>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {

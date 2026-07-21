@@ -5,6 +5,7 @@ import type { List } from "~/lib/api/list";
 import { Modal } from "~/components/ui/Modal";
 import { Button } from "~/components/ui/Button";
 import type { UpdateListDto } from "@repo/shared";
+import { FormInput } from "~/components/ui/FormField";
 
 interface EditListDialogProps {
   list: UpdateListDto | null;
@@ -25,26 +26,21 @@ export function EditListDialog({ list, onClose }: EditListDialogProps) {
   if (!list) return null;
 
   return (
-    <Modal open={Boolean(list)} onClose={onClose} name="Edit list">
+    <Modal open={Boolean(list)} onClose={onClose} title="Edit list">
       <fetcher.Form ref={formRef} method="post" className="space-y-4">
         <input type="hidden" name="intent" value="updateList" />
         {/* <input type="hidden" name="listId" value={list.id} /> */}
         <input type="hidden" name="order" value={list.order} />
 
-        <div>
-          <label htmlFor="edit-list-title" className="mb-1.5 block text-sm font-medium text-slate-300">
-            List title
-          </label>
-          <input
+        <FormInput
             id="edit-list-title"
             name="title"
+            label="List title"
             autoFocus
             required
             maxLength={50}
             defaultValue={list.title}
-            className="w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-2.5 text-sm text-white focus:border-sky-400/50 focus:outline-none focus:ring-2 focus:ring-sky-400/20"
           />
-        </div>
 
         {fetcher.data && !fetcher.data.ok && (
           <p className="text-sm text-rose-400">{fetcher.data.message}</p>

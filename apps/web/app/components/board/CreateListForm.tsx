@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useFetcher } from "react-router";
 import { Button } from "~/components/ui/Button";
+import { FormInput } from "~/components/ui/FormField";
 
 export function CreateListForm({ nextOrder }: { nextOrder: number }) {
   const fetcher = useFetcher<{ ok: boolean }>();
@@ -35,13 +36,12 @@ export function CreateListForm({ nextOrder }: { nextOrder: number }) {
     >
       <input type="hidden" name="intent" value="createList" />
       <input type="hidden" name="order" value={nextOrder} />
-      <input
+      <FormInput
         name="title"
         autoFocus
         required
         maxLength={50}
         placeholder="List title"
-        className="w-full rounded-xl border border-white/10 bg-slate-950/60 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-sky-400/50 focus:outline-none focus:ring-2 focus:ring-sky-400/20"
       />
       <div className="mt-2 flex gap-2">
         <Button type="submit" variant="primary" isLoading={isSubmitting} className="px-3 py-1.5 text-xs">
