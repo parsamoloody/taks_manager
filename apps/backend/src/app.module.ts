@@ -11,6 +11,7 @@ import { BoardMemberModule } from './modules/board_member/board_member.module';
 import { TaskModule } from './modules/task/task.module';
 import { ListModule } from './modules/list/list.module';
 import { UserModule } from './modules/user/user.module';
+import { LabelModule } from './modules/label/label.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { UserModule } from './modules/user/user.module';
     TaskModule,
     ListModule,
     UserModule,
+    LabelModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

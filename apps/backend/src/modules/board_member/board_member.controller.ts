@@ -37,12 +37,13 @@ export class BoardMemberController {
   @ApiParam({ name: 'boardId', description: 'Board identifier' })
   findAll(
     @Param('boardId') boardId: string,
+    @GetUser() currentUser: User,
   ) {
-    return this.boardMembersService.findAll(boardId);
+    return this.boardMembersService.findAll(boardId, currentUser.id);
   }
 
   @UseGuards(JwtGuard)
-  @Delete(':userId')
+  @Delete(':boardId/:userId')
   @ApiOperation({ summary: 'Remove a member from a board' })
   @ApiParam({ name: 'boardId', description: 'Board identifier' })
   @ApiParam({ name: 'userId', description: 'Member user identifier' })

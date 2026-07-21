@@ -122,6 +122,7 @@ export class BoardService {
                                     firstName: true,
                                     lastName: true,
                                     avatar: true,
+                                    email: true,
                                 },
                             },
                         },
@@ -188,6 +189,7 @@ export class BoardService {
                                     firstName: true,
                                     lastName: true,
                                     avatar: true,
+                                    email: true,
                                 },
                             },
                         },
@@ -196,6 +198,9 @@ export class BoardService {
                         orderBy: {
                             createdAt: 'asc',
                         },
+                    },
+                    labels: {
+                        orderBy: { name: 'asc' },
                     },
                 },
             });

@@ -1,6 +1,6 @@
 import type { AuthDto as AuthDtoType } from '@repo/shared';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
 export class AuthDto implements AuthDtoType {
   @ApiProperty({ example: 'user@example.com' })
@@ -9,7 +9,7 @@ export class AuthDto implements AuthDtoType {
   email: string;
 
   @ApiProperty({ example: 'strongPassword123' })
-  @IsEmail()
+  @IsString()
   @IsNotEmpty()
   password: string;
 }

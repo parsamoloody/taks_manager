@@ -53,6 +53,27 @@ export class BoardMemberService {
         );
       }
 
+      const board = await this.prisma.board.findUnique({
+        where: { id: boardId },
+        select: { workspaceId: true },
+      });
+      const workspaceMember = board
+        ? await this.prisma.workspaceMember.findUnique({
+            where: {
+              workspaceId_userId: {
+                workspaceId: board.workspaceId,
+                userId: user.id,
+              },
+            },
+          })
+        : null;
+
+      if (!workspaceMember) {
+        throw new BadRequestException(
+          'User must be a workspace member before joining this board',
+        );
+      }
+
       // Check if user already has access
       const existingMember =
         await this.prisma.boardMember.findUnique({
@@ -99,23 +120,14 @@ export class BoardMemberService {
     }
   }
 
-  async findAll(boardId: string) {
+  async findAll(boardId: string, currentUserId: string) {
     try {
       // Validate input
       if (!boardId) {
         throw new BadRequestException('Board ID is required');
       }
 
-      // Verify board exists
-      const board = await this.prisma.board.findUnique({
-        where: {
-          id: boardId,
-        },
-      });
-
-      if (!board) {
-        throw new NotFoundException('Board not found');
-      }
+      await this.ensureBoardAccess(boardId, currentUserId);
 
       const members =
         await this.prisma.boardMember.findMany({
@@ -127,6 +139,9 @@ export class BoardMemberService {
               select: {
                 id: true,
                 email: true,
+                firstName: true,
+                lastName: true,
+                avatar: true,
               },
             },
           },

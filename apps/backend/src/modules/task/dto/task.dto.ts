@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsDate,
+  IsArray,
   IsEnum,
   IsInt,
   IsOptional,
@@ -9,6 +10,7 @@ import {
   MaxLength,
   Min,
   MinLength,
+  ArrayUnique,
 } from 'class-validator';
 import { TaskPriority, TaskStatus } from '@repo/shared';
 import type {
@@ -54,7 +56,10 @@ export class CreateTaskDto implements SharedCreateTaskDto {
 
   @ApiPropertyOptional({ example: ['label-id'] })
   @IsOptional()
-  lables?: SharedCreateTaskDto[];
+  @IsArray()
+  @ArrayUnique()
+  @IsString({ each: true })
+  labels?: string[];
 
   @ApiPropertyOptional({ example: ['user-id'] })
   @IsOptional()

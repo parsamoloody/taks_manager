@@ -33,6 +33,7 @@ export class TaskService {
 
             await this.ensureBoardAccess(boardId, userId);
             await this.ensureListInBoard(boardId, listId);
+            await this.ensureLabelsInBoard(boardId, dto.labels);
 
             const task = await this.prisma.task.create({
                 data: {
@@ -51,6 +52,14 @@ export class TaskService {
                             })),
                         },
                     }),
+                    ...(dto.labels?.length && {
+                        labels: {
+                            create: dto.labels.map((labelId) => ({ labelId })),
+                        },
+                    }),
+                },
+                include: {
+                    labels: { include: { label: true } },
                 },
             });
 
@@ -79,7 +88,8 @@ export class TaskService {
                             userId: true,
                             assignedAt: true
                         }
-                    }
+                    },
+                    labels: { include: { label: true } },
                 }
             });
         } catch (error) {
@@ -107,7 +117,8 @@ export class TaskService {
                                 userId: true,
                                 assignedAt: true
                             }
-                        }
+                        },
+                        labels: { include: { label: true } },
                     }
             });
 
@@ -141,6 +152,7 @@ export class TaskService {
 
             await this.ensureBoardAccess(boardId, userId);
             await this.ensureListInBoard(boardId, listId);
+            await this.ensureLabelsInBoard(boardId, dto.labels);
 
             const existingTask = await this.prisma.task.findFirst({
                 where: {
@@ -170,6 +182,15 @@ export class TaskService {
                             })),
                         },
                     }),
+                    ...(dto.labels !== undefined && {
+                        labels: {
+                            deleteMany: {},
+                            create: dto.labels.map((labelId) => ({ labelId })),
+                        },
+                    }),
+                },
+                include: {
+                    labels: { include: { label: true } },
                 },
             });
 
@@ -278,6 +299,21 @@ export class TaskService {
 
             this.logger.error(`Error checking list access: ${error}`);
             throw new InternalServerErrorException('Failed to verify list access');
+        }
+    }
+
+    private async ensureLabelsInBoard(boardId: string, labelIds?: string[]): Promise<void> {
+        if (!labelIds?.length) return;
+
+        const count = await this.prisma.label.count({
+            where: {
+                boardId,
+                id: { in: labelIds },
+            },
+        });
+
+        if (count !== labelIds.length) {
+            throw new BadRequestException('One or more labels do not belong to this board');
         }
     }
 
