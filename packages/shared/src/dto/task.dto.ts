@@ -7,7 +7,7 @@ export interface CreateTaskDto {
     priority?: TaskPriority;
     startDate?: Date;
     dueDate?: Date;
-    lables?: CreateTaskDto[];
+    labels?: string[];
     assignee?: string[]
 }
 export interface UpdateTaskDto extends CreateTaskDto {
