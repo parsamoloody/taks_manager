@@ -7,9 +7,16 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   children: ReactNode;
+  size?: "md" | "lg" | "xl";
 }
 
-export function Modal({ open, onClose, title, children }: ModalProps) {
+const SIZE_CLASS = {
+  md: "max-w-md",
+  lg: "max-w-2xl",
+  xl: "max-w-4xl",
+};
+
+export function Modal({ open, onClose, title, children, size = "md" }: ModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -34,7 +41,7 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="w-full max-w-md rounded-[14px] border border-white/10 bg-slate-900 p-4 shadow-2xl sm:p-5"
+        className={`flex max-h-[calc(100vh-2rem)] w-full flex-col rounded-[14px] border border-white/10 bg-slate-900 p-4 shadow-2xl sm:p-5 ${SIZE_CLASS[size]}`}
       >
         <div className="mb-5 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-white">{title}</h2>
@@ -46,7 +53,7 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
             <IoCloseOutline size={24} />
           </button>
         </div>
-        {children}
+        <div className="min-h-0 overflow-y-auto">{children}</div>
       </div>
     </div>
   );

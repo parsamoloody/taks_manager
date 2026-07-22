@@ -11,7 +11,6 @@ import {
 import {
   getBoards,
   createBoard,
-  deleteBoard,
 } from "~/lib/api/board";
 import { getErrorMessage } from "~/lib/api/client";
 import { Button } from "~/components/ui/Button";
@@ -28,8 +27,8 @@ import { DeleteWorkspaceDialog } from "~/components/workspace/DeleteWorkspaceDia
 import { EditWorkspaceDialog } from "~/components/workspace/EditWorkspaceDialog";
 import type { CreateOrUpdateWorkspaceDto } from "@repo/shared";
 
-export function meta({ data }: Route.MetaArgs) {
-  return [{ title: `${data?.workspaceName ?? "Workspace"} · Tsk Manager` }];
+export function meta({}: Route.MetaArgs) {
+  return [{ title: "Workspace · Tsk Manager" }];
 }
 
 export async function loader({ request, params }: Route.LoaderArgs) {
