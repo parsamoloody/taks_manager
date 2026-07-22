@@ -4,11 +4,10 @@ import { useFetcher } from "react-router";
 import type { List } from "~/lib/api/list";
 import { Modal } from "~/components/ui/Modal";
 import { Button } from "~/components/ui/Button";
-import type { UpdateListDto } from "@repo/shared";
 import { FormInput } from "~/components/ui/FormField";
 
 interface EditListDialogProps {
-  list: UpdateListDto | null;
+  list: List | null;
   onClose: () => void;
 }
 
@@ -29,7 +28,7 @@ export function EditListDialog({ list, onClose }: EditListDialogProps) {
     <Modal open={Boolean(list)} onClose={onClose} title="Edit list">
       <fetcher.Form ref={formRef} method="post" className="space-y-4">
         <input type="hidden" name="intent" value="updateList" />
-        {/* <input type="hidden" name="listId" value={list.id} /> */}
+        <input type="hidden" name="listId" value={list.id} />
         <input type="hidden" name="order" value={list.order} />
 
         <FormInput

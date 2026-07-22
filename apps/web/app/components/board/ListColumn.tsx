@@ -5,14 +5,13 @@ import type { List } from "~/lib/api/list";
 import type { Task } from "~/lib/api/task";
 import { TaskCard } from "./TaskCard";
 import { KebabMenu } from "~/components/ui/KebabMenu";
-import type { UpdateListDto } from "@repo/shared";
 
 interface ListColumnProps {
   list: List;
   tasks: Task[];
   onOpenTask: (task: Task) => void;
   onAddTask: (listId: string) => void;
-  onEditList: (list: UpdateListDto) => void;
+  onEditList: (list: List) => void;
 }
 
 export function ListColumn({ list, tasks, onOpenTask, onAddTask, onEditList }: ListColumnProps) {
