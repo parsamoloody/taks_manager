@@ -12,9 +12,10 @@ export interface KebabMenuItem {
 interface KebabMenuProps {
   items: KebabMenuItem[];
   label?: string;
+  trigger?: ReactNode;
 }
 
-export function KebabMenu({ items, label = "Open menu" }: KebabMenuProps) {
+export function KebabMenu({ items, label = "Open menu", trigger }: KebabMenuProps) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -45,10 +46,10 @@ export function KebabMenu({ items, label = "Open menu" }: KebabMenuProps) {
         aria-label={label}
         aria-expanded={open}
         onClick={() => setOpen((prev) => !prev)}
-        className="cursor-pointer rounded-full p-1 text-slate-400 transition hover:bg-white/10 "
+        className={`cursor-pointer rounded-full text-slate-400 transition hover:bg-white/10 ${trigger ? "p-0" : "p-1"}`}
         data-open={open}
       >
-        <HiDotsVertical size={16} />
+        {trigger ?? <HiDotsVertical size={16} />}
       </button>
 
       {open && (

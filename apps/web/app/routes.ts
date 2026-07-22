@@ -4,6 +4,8 @@ export default [
   index("routes/home.tsx"),
   route("/login", "routes/auth/login.tsx"),
   route("/signup", "routes/auth/signup.tsx"),
+  route("/logout", "routes/logout.tsx"),
+  route("/api/*", "routes/api.$.tsx"),
   route("/profile", "routes/profile.tsx"),
   route("/workspaces", "routes/workspace/workspace.tsx"),
   route("workspaces/:workspaceId", "routes/workspace/workspace.$workspaceId.tsx"),
