@@ -63,6 +63,8 @@ export class CreateTaskDto implements SharedCreateTaskDto {
 
   @ApiPropertyOptional({ example: ['user-id'] })
   @IsOptional()
+  @IsArray()
+  @ArrayUnique()
   @IsString({ each: true })
   assignee?: string[];
 }

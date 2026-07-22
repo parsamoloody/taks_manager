@@ -7,15 +7,18 @@ import { Button } from "~/components/ui/Button";
 import { FormInput, FormTextarea } from "~/components/ui/FormField";
 import { TaskLabelPicker } from "./TaskLabelPicker";
 import { TaskPriorityPicker } from "./TaskPriorityPicker";
+import type { Board } from "~/lib/api/board";
+import { TaskAssigneePicker } from "./TaskAssigneePicker";
 
 interface CreateTaskDialogProps {
   listId: string | null;
   nextOrder: number;
   onClose: () => void;
   labels: LabelDto[];
+  members: Board["members"];
 }
 
-export function CreateTaskDialog({ listId, nextOrder, onClose, labels }: CreateTaskDialogProps) {
+export function CreateTaskDialog({ listId, nextOrder, onClose, labels, members }: CreateTaskDialogProps) {
   const fetcher = useFetcher<{ ok: boolean; message?: string }>();
   const formRef = useRef<HTMLFormElement>(null);
   const isSubmitting = fetcher.state !== "idle";
@@ -62,8 +65,10 @@ export function CreateTaskDialog({ listId, nextOrder, onClose, labels }: CreateT
               label="Due date"
               optional
               type="date"
-            />
+          />
         </div>
+
+        <TaskAssigneePicker key={listId ?? "closed"} members={members} />
 
         <TaskLabelPicker key={listId ?? "closed"} labels={labels} />
 

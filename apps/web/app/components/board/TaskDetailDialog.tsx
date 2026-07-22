@@ -3,17 +3,20 @@ import { useEffect, useRef } from "react";
 import { useFetcher } from "react-router";
 import type { LabelDto } from "@repo/shared";
 import type { Task } from "~/lib/api/task";
+import type { Board } from "~/lib/api/board";
 import { Modal } from "~/components/ui/Modal";
 import { Button } from "~/components/ui/Button";
 import { FormInput, FormTextarea } from "~/components/ui/FormField";
 import { TaskLabelPicker } from "./TaskLabelPicker";
 import { HiOutlinePencil } from "react-icons/hi";
 import { TaskPriorityPicker } from "./TaskPriorityPicker";
+import { TaskAssigneePicker } from "./TaskAssigneePicker";
 
 interface TaskDetailDialogProps {
   task: Task | null;
   onClose: () => void;
   labels: LabelDto[];
+  members: Board["members"];
 }
 
 function toDateInputValue(value?: string | null) {
@@ -21,7 +24,7 @@ function toDateInputValue(value?: string | null) {
   return new Date(value).toISOString().slice(0, 10);
 }
 
-export function TaskDetailDialog({ task, onClose, labels }: TaskDetailDialogProps) {
+export function TaskDetailDialog({ task, onClose, labels, members }: TaskDetailDialogProps) {
   const fetcher = useFetcher<{ ok: boolean; message?: string }>();
   const formRef = useRef<HTMLFormElement>(null);
   const submissionStartedRef = useRef(false);
@@ -75,6 +78,13 @@ export function TaskDetailDialog({ task, onClose, labels }: TaskDetailDialogProp
           />
 
 
+        <div className="border-t border-white/10 pt-4">
+          <TaskAssigneePicker
+            key={task.id}
+            members={members}
+            defaultSelected={task.assignee?.map((item) => item.userId)}
+          />
+        </div>
         <div className="border-t border-white/10 pt-4">
           <TaskLabelPicker
             key={task.id}

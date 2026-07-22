@@ -34,6 +34,7 @@ export class TaskService {
             await this.ensureBoardAccess(boardId, userId);
             await this.ensureListInBoard(boardId, listId);
             await this.ensureLabelsInBoard(boardId, dto.labels);
+            await this.ensureAssigneesInBoard(boardId, dto.assignee);
 
             const task = await this.prisma.task.create({
                 data: {
@@ -59,6 +60,12 @@ export class TaskService {
                     }),
                 },
                 include: {
+                    assignee: {
+                        select: {
+                            userId: true,
+                            assignedAt: true
+                        }
+                    },
                     labels: { include: { label: true } },
                 },
             });
@@ -175,8 +182,9 @@ export class TaskService {
                     ...(dto.startDate !== undefined ? { startDate: dto.startDate ?? null } : {}),
                     ...(dto.dueDate !== undefined ? { dueDate: dto.dueDate ?? null } : {}),
                     ...(dto.status !== undefined ? { status: dto.status } : {}),
-                    ...(dto.assignee?.length && {
+                    ...(dto.assignee !== undefined && {
                         assignee: {
+                            deleteMany: {},
                             create: dto.assignee.map((userId) => ({
                                 userId,
                             })),
@@ -190,6 +198,12 @@ export class TaskService {
                     }),
                 },
                 include: {
+                    assignee: {
+                        select: {
+                            userId: true,
+                            assignedAt: true
+                        }
+                    },
                     labels: { include: { label: true } },
                 },
             });
@@ -314,6 +328,21 @@ export class TaskService {
 
         if (count !== labelIds.length) {
             throw new BadRequestException('One or more labels do not belong to this board');
+        }
+    }
+
+    private async ensureAssigneesInBoard(boardId: string, userIds?: string[]): Promise<void> {
+        if (!userIds?.length) return;
+
+        const count = await this.prisma.boardMember.count({
+            where: {
+                boardId,
+                userId: { in: userIds },
+            },
+        });
+
+        if (count !== userIds.length) {
+            throw new BadRequestException('One or more assignees do not belong to this board');
         }
     }
 

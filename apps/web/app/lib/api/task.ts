@@ -12,10 +12,15 @@ export interface Task {
   status: TaskStatus;
   startDate?: string | null;
   dueDate?: string | null;
-  assignee?: string[];
+  assignee?: TaskAssignee[];
   labels?: { taskId: string; labelId: string; label: LabelDto }[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface TaskAssignee {
+  userId: string;
+  assignedAt: string;
 }
 
 export interface TaskFormValues {
