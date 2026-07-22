@@ -95,6 +95,7 @@ export async function action({ request, params }: Route.ActionArgs) {
                     order: Number(formData.get("order") ?? 0),
                     priority: (formData.get("priority") as any) || undefined,
                     dueDate: dueDate ? new Date(String(dueDate)).toISOString() : undefined,
+                    labels: formData.getAll("labelIds").map(String),
                 });
                 return { ok: true };
             }
@@ -112,6 +113,7 @@ export async function action({ request, params }: Route.ActionArgs) {
                     priority: (formData.get("priority") as any) || undefined,
                     dueDate: dueDate ? new Date(String(dueDate)).toISOString() : undefined,
                     startDate: startDate ? new Date(String(startDate)).toISOString() : undefined,
+                    labels: formData.getAll("labelIds").map(String),
                 });
                 return { ok: true };
             }
@@ -246,10 +248,12 @@ export default function BoardPage() {
             <CreateTaskDialog
                 listId={createTaskListId}
                 nextOrder={createTaskListId ? (tasksByList[createTaskListId]?.length ?? 0) : 0}
+                labels={labels}
                 onClose={() => setCreateTaskListId(null)}
             />
 
-            <TaskDetailDialog task={activeTask} onClose={() => setActiveTask(null)} />
-            <EditListDialog list={editingList} onClose={() => setEditingList(null)} />        </main>
+            <TaskDetailDialog task={activeTask} labels={labels} onClose={() => setActiveTask(null)} />
+            <EditListDialog list={editingList} onClose={() => setEditingList(null)} />
+        </main>
     );
 }

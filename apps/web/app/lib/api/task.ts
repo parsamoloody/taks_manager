@@ -1,5 +1,5 @@
 // app/lib/api/task.ts
-import { TaskPriority, TaskStatus } from "@repo/shared";
+import { TaskPriority, TaskStatus, type LabelDto } from "@repo/shared";
 import { requestJson } from "./client";
 
 export interface Task {
@@ -13,6 +13,7 @@ export interface Task {
   startDate?: string | null;
   dueDate?: string | null;
   assignee?: string[];
+  labels?: { taskId: string; labelId: string; label: LabelDto }[];
   createdAt: string;
   updatedAt: string;
 }
@@ -25,6 +26,7 @@ export interface TaskFormValues {
   startDate?: string;
   dueDate?: string;
   assignee?: string[];
+  labels?: string[];
 }
 
 export interface UpdateTaskPayload extends TaskFormValues {

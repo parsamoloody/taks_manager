@@ -1,18 +1,21 @@
 // app/components/board/CreateTaskDialog.tsx
 import { useEffect, useRef } from "react";
 import { useFetcher } from "react-router";
-import { TaskPriority } from "@repo/shared";
+import { TaskPriority, type LabelDto } from "@repo/shared";
 import { Modal } from "~/components/ui/Modal";
 import { Button } from "~/components/ui/Button";
-import { FormInput, FormSelect, FormTextarea } from "~/components/ui/FormField";
+import { FormInput, FormTextarea } from "~/components/ui/FormField";
+import { TaskLabelPicker } from "./TaskLabelPicker";
+import { TaskPriorityPicker } from "./TaskPriorityPicker";
 
 interface CreateTaskDialogProps {
   listId: string | null;
   nextOrder: number;
   onClose: () => void;
+  labels: LabelDto[];
 }
 
-export function CreateTaskDialog({ listId, nextOrder, onClose }: CreateTaskDialogProps) {
+export function CreateTaskDialog({ listId, nextOrder, onClose, labels }: CreateTaskDialogProps) {
   const fetcher = useFetcher<{ ok: boolean; message?: string }>();
   const formRef = useRef<HTMLFormElement>(null);
   const isSubmitting = fetcher.state !== "idle";
@@ -51,18 +54,7 @@ export function CreateTaskDialog({ listId, nextOrder, onClose }: CreateTaskDialo
           />
 
         <div className="grid grid-cols-2 gap-3">
-          <FormSelect
-              id="new-priority"
-              name="priority"
-              label="Priority"
-              defaultValue={TaskPriority.MEDIUM}
-            >
-              {Object.values(TaskPriority).map((p) => (
-                <option key={p} value={p}>
-                  {p.charAt(0) + p.slice(1).toLowerCase()}
-                </option>
-              ))}
-            </FormSelect>
+          <TaskPriorityPicker key={listId ?? "closed"} defaultValue={TaskPriority.MEDIUM} />
 
           <FormInput
               id="new-dueDate"
@@ -72,6 +64,8 @@ export function CreateTaskDialog({ listId, nextOrder, onClose }: CreateTaskDialo
               type="date"
             />
         </div>
+
+        <TaskLabelPicker key={listId ?? "closed"} labels={labels} />
 
         {fetcher.data && !fetcher.data.ok && (
           <p className="text-sm text-rose-400">{fetcher.data.message}</p>

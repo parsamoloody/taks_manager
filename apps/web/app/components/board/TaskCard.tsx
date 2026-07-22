@@ -43,7 +43,7 @@ export function TaskCard({ task, onOpen }: TaskCardProps) {
           </button>
         </fetcher.Form>
 
-        <button onClick={() => onOpen(task)} className="min-w-0 flex-1 text-left">
+        <button onClick={() => onOpen(task)} className="cursor-pointer min-w-0 flex-1 text-left">
           <p className={`truncate text-sm font-medium ${isDone ? "text-slate-500 line-through" : "text-white"}`}>
             {task.title}
           </p>
