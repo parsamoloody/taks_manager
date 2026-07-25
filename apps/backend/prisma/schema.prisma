@@ -67,7 +67,7 @@ model Workspace {
 
   members WorkspaceMember[]
 
-  boards `[]
+  boards Board[]
 }
 
 model WorkspaceMember {
