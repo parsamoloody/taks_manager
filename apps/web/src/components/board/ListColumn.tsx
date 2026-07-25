@@ -40,7 +40,7 @@ function ListColumnComponent({
   const isDeleting =
     mutation.state !== "idle" && mutation.formData?.get("listId") === list.id;
   // const completedCount = tasks.filter(
-    (task) => task.status === TaskStatus.DONE,
+    // (task) => task.status === TaskStatus.DONE,
   // ).length;
   // const progress =
   //   tasks.length === 0 ? 0 : Math.round((completedCount / tasks.length) * 100);
