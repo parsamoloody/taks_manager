@@ -1,0 +1,25 @@
+import { signUp } from "~/server/api/auth";
+import { getErrorMessage } from "~/server/api/client";
+import { setAccessToken } from "~/server/auth/session";
+import { fieldString, fieldTrimmedString } from "~/server/http/form";
+import { withMutation } from "~/server/http/handlers";
+
+export default withMutation(async ({ fields, res }) => {
+  const email = fieldTrimmedString(fields, "email");
+  const password = fieldString(fields, "password");
+
+  if (!email || !password) {
+    return {
+      ok: false,
+      message: "Please enter both your email and password.",
+    };
+  }
+
+  try {
+    const result = await signUp({ email, password });
+    setAccessToken(res, result.access_token);
+    return { ok: true, redirectTo: "/workspaces" };
+  } catch (error) {
+    return { ok: false, message: getErrorMessage(error) };
+  }
+});

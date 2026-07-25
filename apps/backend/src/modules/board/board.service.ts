@@ -46,6 +46,13 @@ export class BoardService {
                     }
                 },
                 include: {
+                    workspace: {
+                        select: {
+                            id: true,
+                            name: true,
+                            logo: true,
+                        },
+                    },
                     members: {
                         include: {
                             user: {
@@ -196,7 +203,27 @@ export class BoardService {
                     },
                     lists: {
                         orderBy: {
-                            createdAt: 'asc',
+                            order: 'asc',
+                        },
+                        include: {
+                            tasks: {
+                                orderBy: {
+                                    order: 'asc',
+                                },
+                                include: {
+                                    assignee: {
+                                        select: {
+                                            userId: true,
+                                            assignedAt: true,
+                                        },
+                                    },
+                                    labels: {
+                                        include: {
+                                            label: true,
+                                        },
+                                    },
+                                },
+                            },
                         },
                     },
                     labels: {
@@ -267,7 +294,12 @@ export class BoardService {
                 where: {
                     id: boardId,
                 },
-                data: dto,
+                data: {
+                    ...dto,
+                    ...(dto.description !== undefined
+                        ? { description: dto.description.trim() || null }
+                        : {}),
+                },
             });
 
             if (updatedBoard.visibility !== 'PRIVATE') {

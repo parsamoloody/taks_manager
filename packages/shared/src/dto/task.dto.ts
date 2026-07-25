@@ -10,6 +10,6 @@ export interface CreateTaskDto {
     labels?: string[];
     assignee?: string[]
 }
-export interface UpdateTaskDto extends CreateTaskDto {
+export interface UpdateTaskDto extends Partial<CreateTaskDto> {
     status?: TaskStatus;
 }

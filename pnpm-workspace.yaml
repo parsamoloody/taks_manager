@@ -6,3 +6,4 @@ allowBuilds:
   '@scarf/scarf': true
   argon2: false
   prisma: true
+  sharp: true

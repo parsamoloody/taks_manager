@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsDate,
@@ -69,7 +69,7 @@ export class CreateTaskDto implements SharedCreateTaskDto {
   assignee?: string[];
 }
 
-export class UpdateTaskDto extends CreateTaskDto implements SharedUpdateTaskDto {
+export class UpdateTaskDto extends PartialType(CreateTaskDto) implements SharedUpdateTaskDto {
   @ApiPropertyOptional({ enum: TaskStatus, example: TaskStatus.PENDING })
   @IsOptional()
   @IsEnum(TaskStatus)

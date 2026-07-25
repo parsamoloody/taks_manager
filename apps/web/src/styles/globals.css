@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans:
+    Inter, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+html {
+  min-width: 320px;
+  background: #020617;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background: #020617;
+  color: #f8fafc;
+  font-family: var(--font-sans);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: rgb(56 189 248 / 0.28);
+  color: #f8fafc;
+}
+
+.landing-grid {
+  background-image:
+    linear-gradient(rgb(148 163 184 / 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(148 163 184 / 0.055) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(to bottom, black, transparent 82%);
+}
+
+.product-grid {
+  background-image:
+    radial-gradient(
+      circle at 15% -10%,
+      rgb(56 189 248 / 0.075),
+      transparent 32rem
+    ),
+    radial-gradient(
+      circle at 90% 20%,
+      rgb(139 92 246 / 0.055),
+      transparent 30rem
+    ),
+    linear-gradient(rgb(148 163 184 / 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(148 163 184 / 0.025) 1px, transparent 1px);
+  background-size:
+    auto,
+    auto,
+    48px 48px,
+    48px 48px;
+}
+
+.board-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(71 85 105 / 0.75) transparent;
+}
+
+.board-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.board-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.board-scrollbar::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: rgb(71 85 105 / 0.75);
+  background-clip: padding-box;
+}
+
+@supports (content-visibility: auto) {
+  .task-card {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 8rem;
+  }
+}
+
+@keyframes landing-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .landing-float {
+    animation: landing-float 5s ease-in-out infinite;
+  }
+}

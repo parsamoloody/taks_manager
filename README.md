@@ -2,7 +2,7 @@
 
 A modern task management application designed to help individuals and teams organize their work efficiently. this task manager provides an intuitive Kanban board experience with workspaces, boards, lists, and tasks, making it easy to plan, track, and collaborate on projects.
 
-Built with a modern full-stack architecture using NestJS, ReactJs, Prisma, and PostgreSQL, the project emphasizes clean architecture, scalability, and maintainability. It serves as both a practical productivity tool and a reference implementation for building modular, production-ready web applications.
+Built with a modern full-stack architecture using NestJS, Next.js (Pages Router), Prisma, and PostgreSQL, the project emphasizes clean architecture, scalability, and maintainability. It serves as both a practical productivity tool and a reference implementation for building modular, production-ready web applications.
 
 ## Monorepo Overview
 
@@ -89,50 +89,17 @@ import type { AuthDto } from '@repo/shared';
 
 ---
 
-## Adding a React app (quick)
+## Web application
 
-Create a new Vite React app inside `apps/`:
-
-```bash
-pnpm create vite apps/web -- --template react-ts
-```
-
-change the app name:
-1- open the `apps/web/package.json` file
-2- change the `name` to web or something you like, like this:
-
-```json
-{
-  "name": "web",
-  "private": true,
-  "type": "module",
-```
-
-install dependencies of workspace apps and packages:
-```bash
-pnpm install
-```
-build shared package:
-```bash
-pnpm turbo build --filter=@repo/shared
-```
-
-Add the shared package to your new app:
-```bash
-pnpm add @repo/shared --filter web --workspace
-```
-
-From repository root:
+The frontend lives in `apps/web` and uses Next.js 16 with the Pages Router.
+From the repository root:
 
 ```bash
-pnpm turbo run dev --filter=web
+pnpm --filter web dev
 ```
 
-Import shared types in the React app:
-
-```ts
-import type { WorkspaceDto } from '@repo/shared';
-```
+See [apps/web/README.md](apps/web/README.md) for its architecture, environment,
+caching model, and production commands.
 
 ---
 

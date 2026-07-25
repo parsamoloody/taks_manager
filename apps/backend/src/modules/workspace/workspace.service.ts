@@ -172,6 +172,52 @@ export class WorkspaceService {
     }
   }
 
+  async findOne(workspaceId: string, userId: string) {
+    try {
+      if (!workspaceId || !userId) {
+        throw new BadRequestException(
+          'Workspace ID and User ID are required',
+        );
+      }
+
+      const workspace = await this.prisma.workspace.findFirst({
+        where: {
+          id: workspaceId,
+          members: {
+            some: {
+              userId,
+            },
+          },
+        },
+        include: {
+          members: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  email: true,
+                  firstName: true,
+                  lastName: true,
+                  avatar: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!workspace) {
+        throw new NotFoundException(
+          'Workspace not found or user is not a member',
+        );
+      }
+
+      return workspace;
+    } catch (error) {
+      this.handleError(error, 'Failed to retrieve workspace');
+    }
+  }
+
   async remove(
     workspaceId: string,
     userId: string,

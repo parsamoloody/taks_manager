@@ -33,6 +33,17 @@ export class WorkspaceController {
   }
 
   @UseGuards(JwtGuard)
+  @Get(':workspaceId')
+  @ApiOperation({ summary: 'Get a workspace for the current user' })
+  @ApiParam({ name: 'workspaceId', description: 'Workspace identifier' })
+  findOne(
+    @GetUser() user: User,
+    @Param('workspaceId') workspaceId: string,
+  ) {
+    return this.workspaceService.findOne(workspaceId, user.id);
+  }
+
+  @UseGuards(JwtGuard)
   @Put(':workspaceId')
   @ApiOperation({ summary: 'Update a workspace' })
   @ApiParam({ name: 'workspaceId', description: 'Workspace identifier' })
