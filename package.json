@@ -2,15 +2,16 @@
   "name": "task_manager",
   "version": "1.0.0",
   "description": "",
+  "packageManager": "pnpm@10.14.0",
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
     "test": "turbo run test",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck"
-  },
-  "engines": {
-    "node": "20.x"
   },
   "keywords": [],
   "author": "",
