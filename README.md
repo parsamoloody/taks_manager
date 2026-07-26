@@ -32,6 +32,7 @@ pnpm install
 Build the shared package (required before running apps):
 
 ```bash
+pnpm --filter @repo/shared add -D typescript
 pnpm turbo build --filter=@repo/shared
 ```
 
@@ -57,6 +58,7 @@ Purpose: share lightweight TypeScript types, enums, and helpers (no NestJS runti
 Edit `packages/shared/src`, export from `packages/shared/src/index.ts`, then build:
 
 ```bash
+pnpm --filter @repo/shared add -D typescript
 pnpm turbo build --filter=@repo/shared
 ```
 
@@ -78,6 +80,7 @@ At repo root run:
 
 ```bash
 pnpm install
+pnpm --filter @repo/shared add -D typescript
 pnpm turbo build --filter=@repo/shared
 ```
 
@@ -128,6 +131,7 @@ pnpm install
 Build shared package:
 
 ```bash
+pnpm --filter @repo/shared add -D typescript
 pnpm turbo build --filter=@repo/shared
 ```
 
