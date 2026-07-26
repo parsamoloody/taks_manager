@@ -43,7 +43,7 @@ export function MutationProvider({
 }: MutationProviderProps) {
   const value = useMemo(
     () => ({ endpoint, redirectTo }),
-    [endpoint, redirectTo],
+    [redirectTo],
   );
 
   return (
