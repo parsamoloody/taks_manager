@@ -6,6 +6,12 @@
   "engines": {
     "node": "20.x"
   },
+  "pnpm": {
+    "overrides": {
+      "baseline-browser-mapping": "2.11.3",
+      "globals": "17.7.0"
+    }
+  },
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
