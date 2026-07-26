@@ -20,7 +20,7 @@ interface AuthPageProps {
 export function AuthPage({ mode }: AuthPageProps) {
   return (
     <MutationProvider
-      endpoint={mode === "login" ? "/api/auth/login" : "/api/auth/signup"}
+      endpoint={mode === "login" ? "/auth/login" : "/auth/signup"}
       redirectTo="/workspaces"
     >
       <AuthPageContent mode={mode} />
