@@ -110,7 +110,7 @@ function appendSetCookie(response: SessionResponse, cookie: string) {
 }
 
 function serializeCookie(value: string, maxAge: number, expires: Date) {
-  const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
+  const secure = process.env.APP_ENV === "production" ? "; Secure" : "";
   return (
     [
       `${COOKIE_NAME}=${encodeURIComponent(value)}`,
