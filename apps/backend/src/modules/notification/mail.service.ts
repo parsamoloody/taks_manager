@@ -10,22 +10,23 @@ export abstract class MailService {
 
 @Injectable()
 export class ResendMailService extends MailService {
-  private readonly resend: Resend;
+  private resend?: Resend;
   private readonly from: string;
 
   constructor(private readonly config: ConfigService) {
     super();
-    this.resend = new Resend(this.config.get<string>('mail.resendApiKey'));
     this.from =
       this.config.get<string>('mail.from') ??
       'Task Manager <onboarding@resend.dev>';
   }
 
   async send(message: MailMessage): Promise<void> {
-    if (!this.config.get<string>('mail.resendApiKey')) {
+    const apiKey = this.config.get<string>('mail.resendApiKey');
+    if (!apiKey) {
       throw new Error('RESEND_API_KEY is not configured');
     }
 
+    this.resend ??= new Resend(apiKey);
     const { error } = await this.resend.emails.send({
       from: this.from,
       ...message,
