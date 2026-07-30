@@ -1,7 +1,7 @@
 import { FormInput } from "~/components/ui/FormField";
 
 interface AuthFieldProps {
-  label: string;
+  label?: string;
   name: string;
   type: string;
   placeholder?: string;
