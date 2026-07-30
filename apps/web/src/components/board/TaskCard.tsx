@@ -1,11 +1,16 @@
 import { memo } from "react";
 import { TaskStatus } from "@repo/shared";
-import { HiOutlineCalendar, HiOutlineDocumentText } from "react-icons/hi";
+import {
+  HiOutlineBell,
+  HiOutlineCalendar,
+  HiOutlineDocumentText,
+} from "react-icons/hi";
 import type { MemberUser } from "~/server/api/board";
 import type { Task } from "~/server/api/task";
 import { GroupMembers } from "~/components/ui/GroupMembers";
 import { PriorityBadge } from "~/components/ui/PriorityBadge";
 import { MutationForm, useMutation } from "~/modules/mutations/client";
+import { getTaskDueInfo, reminderTitle } from "~/lib/taskDue";
 
 interface TaskCardProps {
   task: Task;
@@ -43,11 +48,27 @@ function TaskCardComponent({ task, membersById, onOpen }: TaskCardProps) {
   const visibleLabels = task.labels?.slice(0, 2) ?? [];
   const remainingLabels = Math.max((task.labels?.length ?? 0) - 2, 0);
   const formattedDueDate = formatDate(task.dueDate);
+  const dueInfo = getTaskDueInfo(task.dueDate, isDone);
+  const cardUrgencyClass =
+    dueInfo?.state === "overdue" || dueInfo?.state === "today"
+      ? "border-rose-400/35 bg-rose-500/[0.08] hover:border-rose-300/45 hover:bg-rose-500/[0.11]"
+      : dueInfo?.state === "soon"
+        ? "border-amber-300/25 bg-amber-400/[0.06] hover:border-amber-300/40 hover:bg-amber-400/[0.09]"
+        : "border-white/[0.09] bg-white/[0.04] hover:border-sky-300/25 hover:bg-white/[0.07]";
+  const dueBadgeClass =
+    dueInfo?.state === "overdue" || dueInfo?.state === "today"
+      ? "border border-rose-400/30 bg-rose-400/10 px-1.5 py-0.5 text-rose-200"
+      : dueInfo?.state === "soon"
+        ? "border border-amber-300/25 bg-amber-300/10 px-1.5 py-0.5 text-amber-100"
+        : "text-slate-400";
+  const hasEmailReminder =
+    assignedMembers.length > 0 &&
+    (dueInfo?.state === "soon" || dueInfo?.state === "today");
 
   return (
     <article
       aria-busy={isToggling || undefined}
-      className={`task-card group rounded-2xl border border-white/[0.09] bg-white/[0.04] p-3 transition hover:border-sky-300/25 hover:bg-white/[0.07] focus-within:border-sky-300/35 ${
+      className={`task-card group rounded-2xl border p-3 transition focus-within:border-sky-300/35 ${cardUrgencyClass} ${
         isToggling ? "opacity-60" : ""
       }`}
     >
@@ -130,10 +151,19 @@ function TaskCardComponent({ task, membersById, onOpen }: TaskCardProps) {
         {formattedDueDate ? (
           <time
             dateTime={task.dueDate ?? undefined}
-            className="inline-flex items-center gap-1 text-[10px] font-medium text-slate-400"
+            title={
+              hasEmailReminder
+                ? reminderTitle(dueInfo?.reminderLeadDays)
+                : undefined
+            }
+            className={`inline-flex items-center gap-1 rounded-md text-[10px] font-semibold ${dueBadgeClass}`}
           >
-            <HiOutlineCalendar className="h-3.5 w-3.5 text-slate-500" />
-            {formattedDueDate}
+            {hasEmailReminder ? (
+              <HiOutlineBell className="h-3.5 w-3.5" />
+            ) : (
+              <HiOutlineCalendar className="h-3.5 w-3.5 text-slate-500" />
+            )}
+            {dueInfo?.label || formattedDueDate}
           </time>
         ) : null}
         {assignedMembers.length > 0 ? (

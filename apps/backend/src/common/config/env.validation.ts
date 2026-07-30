@@ -31,5 +31,7 @@ export const envValidationSchema = Joi.object({
 
   PASSWORD_RESET_TTL_MINUTES: Joi.number().integer().positive().default(30),
 
-  TASK_REMINDER_LEAD_MINUTES: Joi.number().integer().min(0).default(60),
+  TASK_REMINDER_LEAD_DAYS: Joi.number().min(0).default(1),
+
+  TASK_REMINDER_LEAD_MINUTES: Joi.number().integer().min(0).optional(),
 });

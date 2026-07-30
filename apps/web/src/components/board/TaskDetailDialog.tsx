@@ -8,10 +8,15 @@ import { Button } from "~/components/ui/Button";
 import { ConfirmDialog } from "~/components/ui/ConfirmDialog";
 import { FormInput, FormTextarea } from "~/components/ui/FormField";
 import { TaskLabelPicker } from "./TaskLabelPicker";
-import { HiOutlinePencil } from "react-icons/hi";
+import { HiOutlineBell, HiOutlinePencil } from "react-icons/hi";
 import { TaskPriorityPicker } from "./TaskPriorityPicker";
 import { TaskAssigneePicker } from "./TaskAssigneePicker";
 import { MutationForm, useMutation } from "~/modules/mutations/client";
+import {
+  getTaskDueInfo,
+  reminderTitle,
+  type TaskDueState,
+} from "~/lib/taskDue";
 
 interface TaskDetailDialogProps {
   task: Task | null;
@@ -50,6 +55,7 @@ export function TaskDetailDialog({
   }, [mutation.state, mutation.data, onClose]);
 
   if (!task) return null;
+  const dueInfo = getTaskDueInfo(task.dueDate, task.status === "DONE");
 
   return (
     <>
@@ -110,11 +116,21 @@ export function TaskDetailDialog({
             <FormInput
               id="dueDate"
               name="dueDate"
-              label="Due date"
+              label={
+                <span className="inline-flex items-center gap-1.5">
+                  Due date
+                  {(task.assignee?.length ?? 0) > 0 ? (
+                    <HiOutlineBell
+                      className="h-3.5 w-3.5 text-slate-500"
+                      title={reminderTitle()}
+                    />
+                  ) : null}
+                </span>
+              }
               optional
               type="date"
               defaultValue={toDateInputValue(task.dueDate)}
-              className="border-transparent bg-transparent px-2 hover:bg-white/[0.04] focus:border-sky-400/50 focus:bg-slate-950/60"
+              className={`bg-transparent px-2 hover:bg-white/[0.04] focus:border-sky-400/50 focus:bg-slate-950/60 ${dueDateInputClass(dueInfo?.state)}`}
             />
 
             <FormInput
@@ -173,4 +189,14 @@ export function TaskDetailDialog({
       />
     </>
   );
+}
+
+function dueDateInputClass(state?: TaskDueState) {
+  if (state === "overdue" || state === "today") {
+    return "border-rose-400/40 bg-rose-400/[0.08] text-rose-100";
+  }
+  if (state === "soon") {
+    return "border-amber-300/30 bg-amber-300/[0.06] text-amber-100";
+  }
+  return "border-transparent";
 }

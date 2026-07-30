@@ -1,3 +1,13 @@
+function taskReminderLeadMinutes() {
+  const configuredMinutes = Number(process.env.TASK_REMINDER_LEAD_MINUTES);
+  if (Number.isFinite(configuredMinutes) && configuredMinutes >= 0) {
+    return configuredMinutes;
+  }
+
+  const configuredDays = Number(process.env.TASK_REMINDER_LEAD_DAYS ?? '1');
+  return (Number.isFinite(configuredDays) ? configuredDays : 1) * 24 * 60;
+}
+
 export default () => ({
   app: {
     port: parseInt(process.env.PORT ?? '3000', 10),
@@ -31,9 +41,6 @@ export default () => ({
       process.env.PASSWORD_RESET_TTL_MINUTES ?? '30',
       10,
     ),
-    taskReminderLeadMinutes: parseInt(
-      process.env.TASK_REMINDER_LEAD_MINUTES ?? '60',
-      10,
-    ),
+    taskReminderLeadMinutes: taskReminderLeadMinutes(),
   },
 });

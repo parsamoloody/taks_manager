@@ -29,10 +29,14 @@ Copy `.env.example` to `.env` and configure:
 API_URL=http://localhost:4000
 SESSION_SECRET=replace-with-a-long-random-secret
 API_TIMEOUT_MS=10000
+NEXT_PUBLIC_TASK_REMINDER_DAYS=1
 ```
 
 `API_URL` is server-only. Browser requests use same-origin Next API routes, so
 backend access tokens never need to be exposed to client-side code.
+
+Keep `NEXT_PUBLIC_TASK_REMINDER_DAYS` aligned with the backend
+`TASK_REMINDER_LEAD_DAYS` value so task urgency styling matches email delivery.
 
 ## Architecture
 

@@ -9,6 +9,8 @@ import { TaskPriorityPicker } from "./TaskPriorityPicker";
 import type { Board } from "~/server/api/board";
 import { TaskAssigneePicker } from "./TaskAssigneePicker";
 import { MutationForm, useMutation } from "~/modules/mutations/client";
+import { HiOutlineBell } from "react-icons/hi";
+import { reminderTitle } from "~/lib/taskDue";
 
 interface CreateTaskDialogProps {
   listId: string | null;
@@ -71,7 +73,15 @@ export function CreateTaskDialog({
           <FormInput
             id="new-dueDate"
             name="dueDate"
-            label="Due date"
+            label={
+              <span className="inline-flex items-center gap-1.5">
+                Due date
+                <HiOutlineBell
+                  className="h-3.5 w-3.5 text-slate-500"
+                  title={reminderTitle()}
+                />
+              </span>
+            }
             optional
             type="date"
           />

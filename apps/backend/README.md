@@ -139,12 +139,15 @@ REDIS_PORT=6379
 REDIS_PASSWORD=
 INVITATION_TTL_HOURS=168
 PASSWORD_RESET_TTL_MINUTES=30
-TASK_REMINDER_LEAD_MINUTES=60
+TASK_REMINDER_LEAD_DAYS=1
 ```
 
 Resend must be configured with a verified sender domain. Redis stores
 notification jobs, retries, and delayed task reminders. For the complete
 development defaults, see `.env.example`.
+
+`TASK_REMINDER_LEAD_DAYS` controls how many days before a due date the email is
+sent. `TASK_REMINDER_LEAD_MINUTES` can be set as a more precise override.
 
 ## Running the backend
 

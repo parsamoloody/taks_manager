@@ -11,12 +11,17 @@ This project is built using Turborepo and pnpm workspaces. The repository contai
 ---
 
 ## APPS
+
 #### Backend
+
 - [document](https://github.com/parsamoloody/taks_manager/tree/main/apps/backend#backend-api-documentation)
 - path: apps/backend
+
 #### Web
+
 - [document](https://github.com/parsamoloody/taks_manager/blob/main/apps/web/README.md)
 - path: apps/web
+
 ## Quick Start
 
 Prereqs: Node.js 22+, pnpm, PostgreSQL.
@@ -65,9 +70,11 @@ pnpm turbo build --filter=@repo/shared
 you have two way to add shared package (manually or commandline)
 
 commandline: (recommended):
+
 ```bash
 pnpm add @repo/shared --filter web --workspace
 ```
+
 manually: Add a workspace dependency in an app's `package.json`:
 
 ```json
@@ -87,7 +94,7 @@ pnpm turbo build --filter=@repo/shared
 Import in app code:
 
 ```ts
-import type { AuthDto } from '@repo/shared';
+import type { AuthDto } from "@repo/shared";
 ```
 
 ---
@@ -121,6 +128,7 @@ RESEND_API_KEY="re_your_api_key"
 MAIL_FROM="Task Manager <notifications@your-domain.com>"
 REDIS_HOST="localhost"
 REDIS_PORT="6379"
+TASK_REMINDER_LEAD_DAYS="1"
 ```
 
 ---
@@ -151,8 +159,12 @@ Run only backend:
 ```bash
 pnpm turbo run dev --filter=backend
 ```
+
 ---
+
 ### Project diagram
+
 ![image](https://raw.githubusercontent.com/parsamoloody/taks_manager/refs/heads/main/packages/public/assets/imgs/task_manager_diagram_n_.svg)
 ---
+
 You can see this digram in dark mode!

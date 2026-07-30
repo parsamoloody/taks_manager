@@ -17,14 +17,25 @@ import {
 } from "~/server/http/form";
 import type { MutationResult } from "~/server/http/handlers";
 
-function optionalDate(fields: RequestFields, name: string) {
+function toDateOnlyEndOfDay(value: string) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value)
+    ? new Date(`${value}T23:59:59.999Z`).toISOString()
+    : new Date(value).toISOString();
+}
+
+function optionalDueDate(fields: RequestFields, name: string) {
   const value = fieldString(fields, name);
-  return value ? new Date(value).toISOString() : undefined;
+  return value ? toDateOnlyEndOfDay(value) : undefined;
 }
 
 function nullableDate(fields: RequestFields, name: string) {
   const value = fieldString(fields, name);
   return value ? new Date(value).toISOString() : null;
+}
+
+function nullableDueDate(fields: RequestFields, name: string) {
+  const value = fieldString(fields, name);
+  return value ? toDateOnlyEndOfDay(value) : null;
 }
 
 function optionalPriority(fields: RequestFields) {
@@ -69,7 +80,7 @@ export async function mutateBoard(
           description: fieldString(fields, "description") || undefined,
           order: fieldNumber(fields, "order"),
           priority: optionalPriority(fields),
-          dueDate: optionalDate(fields, "dueDate"),
+          dueDate: optionalDueDate(fields, "dueDate"),
           labels: fieldStrings(fields, "labelIds"),
           assignee: fieldStrings(fields, "assigneeIds"),
         });
@@ -85,7 +96,7 @@ export async function mutateBoard(
           description: fieldString(fields, "description"),
           order: fieldNumber(fields, "order"),
           priority: optionalPriority(fields),
-          dueDate: nullableDate(fields, "dueDate"),
+          dueDate: nullableDueDate(fields, "dueDate"),
           startDate: nullableDate(fields, "startDate"),
           labels: fieldStrings(fields, "labelIds"),
           assignee: fieldStrings(fields, "assigneeIds"),
