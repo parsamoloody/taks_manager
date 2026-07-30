@@ -9,14 +9,178 @@ import {
 } from '@nestjs/common';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
 import { WorkspaceRole } from '@prisma/client';
+import { ActionTokenType } from '@prisma/client';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { AddWorkspaceMemberDto } from './dto/workspace_memeber.dto';
+import { ActionTokenService } from '../notification/action-token.service';
+import { NotificationService } from '../notification/notification.service';
 
 @Injectable()
 export class WorkspaceMembersService {
   private readonly logger = new Logger(WorkspaceMembersService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly config: ConfigService,
+    private readonly actionTokens: ActionTokenService,
+    private readonly notifications: NotificationService,
+  ) {}
+
+  async inviteMember(
+    workspaceId: string,
+    dto: AddWorkspaceMemberDto,
+    currentUserId: string,
+  ) {
+    try {
+      const email = dto.email.trim().toLowerCase();
+      await this.ensureOwner(workspaceId, currentUserId);
+
+      const [workspace, inviter, invitedUser] = await Promise.all([
+        this.prisma.workspace.findUnique({
+          where: { id: workspaceId },
+          select: { name: true },
+        }),
+        this.prisma.user.findUnique({
+          where: { id: currentUserId },
+          select: {
+            email: true,
+            firstName: true,
+            lastName: true,
+          },
+        }),
+        this.prisma.user.findUnique({
+          where: { email },
+          select: { id: true },
+        }),
+      ]);
+
+      if (!workspace || !inviter) {
+        throw new NotFoundException('Workspace or inviter not found');
+      }
+
+      if (invitedUser) {
+        const existingMember = await this.prisma.workspaceMember.findUnique({
+          where: {
+            workspaceId_userId: {
+              workspaceId,
+              userId: invitedUser.id,
+            },
+          },
+        });
+
+        if (existingMember) {
+          throw new ConflictException(
+            'User is already a member of this workspace',
+          );
+        }
+      }
+
+      const ttlHours =
+        this.config.get<number>('notifications.invitationTtlHours') ?? 168;
+      const { token, record } = await this.actionTokens.issue({
+        type: ActionTokenType.WORKSPACE_INVITATION,
+        email,
+        workspaceId,
+        ttlMs: ttlHours * 60 * 60_000,
+      });
+      const inviterName =
+        [inviter.firstName, inviter.lastName].filter(Boolean).join(' ') ||
+        inviter.email;
+
+      await this.notifications.sendWorkspaceInvitation({
+        to: email,
+        workspaceName: workspace.name,
+        inviterName,
+        token,
+        expiresAt: record.expiresAt,
+      });
+
+      return {
+        message: 'Workspace invitation queued',
+        expiresAt: record.expiresAt,
+      };
+    } catch (error) {
+      this.handleError(error, 'Failed to invite workspace member');
+    }
+  }
+
+  async acceptInvitation(tokenValue: string, currentUserId: string) {
+    try {
+      const token = await this.actionTokens.findValid(
+        tokenValue,
+        ActionTokenType.WORKSPACE_INVITATION,
+      );
+      const user = await this.prisma.user.findUnique({
+        where: { id: currentUserId },
+        select: { id: true, email: true },
+      });
+
+      if (!user || user.email.toLowerCase() !== token.email.toLowerCase()) {
+        throw new ForbiddenException(
+          'This invitation belongs to another email address',
+        );
+      }
+
+      if (!token.workspaceId) {
+        throw new BadRequestException('Invitation is invalid');
+      }
+
+      const workspaceId = token.workspaceId;
+      const existingMember = await this.prisma.workspaceMember.findUnique({
+        where: {
+          workspaceId_userId: {
+            workspaceId,
+            userId: user.id,
+          },
+        },
+      });
+
+      if (existingMember) {
+        throw new ConflictException(
+          'User is already a member of this workspace',
+        );
+      }
+
+      const member = await this.prisma.$transaction(async (transaction) => {
+        const consumed = await transaction.actionToken.updateMany({
+          where: {
+            id: token.id,
+            usedAt: null,
+            expiresAt: { gt: new Date() },
+          },
+          data: { usedAt: new Date() },
+        });
+
+        if (consumed.count !== 1) {
+          throw new BadRequestException('Token is invalid or expired');
+        }
+
+        return transaction.workspaceMember.create({
+          data: {
+            workspaceId,
+            userId: user.id,
+            role: WorkspaceRole.MEMBER,
+          },
+          include: {
+            user: {
+              select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        });
+      });
+
+      await this.syncWorkspaceBoardMembers(workspaceId);
+      return member;
+    } catch (error) {
+      this.handleError(error, 'Failed to accept workspace invitation');
+    }
+  }
 
   async addMember(
     workspaceId: string,
@@ -26,9 +190,7 @@ export class WorkspaceMembersService {
     try {
       // Validate inputs
       if (!workspaceId || !currentUserId) {
-        throw new BadRequestException(
-          'Workspace ID and User ID are required',
-        );
+        throw new BadRequestException('Workspace ID and User ID are required');
       }
 
       if (!dto.email) {
@@ -46,21 +208,18 @@ export class WorkspaceMembersService {
       });
 
       if (!user) {
-        throw new NotFoundException(
-          'User with this email does not exist',
-        );
+        throw new NotFoundException('User with this email does not exist');
       }
 
       // Check if already a member
-      const exists =
-        await this.prisma.workspaceMember.findUnique({
-          where: {
-            workspaceId_userId: {
-              workspaceId,
-              userId: user.id,
-            },
+      const exists = await this.prisma.workspaceMember.findUnique({
+        where: {
+          workspaceId_userId: {
+            workspaceId,
+            userId: user.id,
           },
-        });
+        },
+      });
 
       if (exists) {
         throw new ConflictException(
@@ -69,31 +228,27 @@ export class WorkspaceMembersService {
       }
 
       // Add member
-      const member = await this.prisma.workspaceMember.create(
-        {
-          data: {
-            workspaceId,
-            userId: user.id,
-            role: WorkspaceRole.MEMBER,
-          },
-          include: {
-            user: {
-              select: {
-                id: true,
-                email: true,
-                firstName: true,
-                lastName: true,
-              },
+      const member = await this.prisma.workspaceMember.create({
+        data: {
+          workspaceId,
+          userId: user.id,
+          role: WorkspaceRole.MEMBER,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
             },
           },
         },
-      );
+      });
 
       await this.syncWorkspaceBoardMembers(workspaceId);
 
-      this.logger.log(
-        `User ${user.id} added to workspace ${workspaceId}`,
-      );
+      this.logger.log(`User ${user.id} added to workspace ${workspaceId}`);
 
       return member;
     } catch (error) {
@@ -109,37 +264,34 @@ export class WorkspaceMembersService {
       }
 
       // Verify workspace exists
-      const workspace = await this.prisma.workspace.findUnique(
-        {
-          where: {
-            id: workspaceId,
-          },
+      const workspace = await this.prisma.workspace.findUnique({
+        where: {
+          id: workspaceId,
         },
-      );
+      });
 
       if (!workspace) {
         throw new NotFoundException('Workspace not found');
       }
 
-      const members =
-        await this.prisma.workspaceMember.findMany({
-          where: {
-            workspaceId,
-          },
-          include: {
-            user: {
-              select: {
-                id: true,
-                email: true,
-                firstName: true,
-                lastName: true,
-              },
+      const members = await this.prisma.workspaceMember.findMany({
+        where: {
+          workspaceId,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
             },
           },
-          orderBy: {
-            joinedAt: 'desc',
-          },
-        });
+        },
+        orderBy: {
+          joinedAt: 'desc',
+        },
+      });
 
       this.logger.log(
         `Retrieved ${members.length} members for workspace ${workspaceId}`,
@@ -147,49 +299,38 @@ export class WorkspaceMembersService {
 
       return members;
     } catch (error) {
-      this.handleError(
-        error,
-        'Failed to retrieve workspace members',
-      );
+      this.handleError(error, 'Failed to retrieve workspace members');
     }
   }
 
-  async findOne(
-    workspaceId: string,
-    userId: string,
-  ) {
+  async findOne(workspaceId: string, userId: string) {
     try {
       // Validate inputs
       if (!workspaceId || !userId) {
-        throw new BadRequestException(
-          'Workspace ID and User ID are required',
-        );
+        throw new BadRequestException('Workspace ID and User ID are required');
       }
 
-      const member =
-        await this.prisma.workspaceMember.findUnique({
-          where: {
-            workspaceId_userId: {
-              workspaceId,
-              userId,
+      const member = await this.prisma.workspaceMember.findUnique({
+        where: {
+          workspaceId_userId: {
+            workspaceId,
+            userId,
+          },
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
             },
           },
-          include: {
-            user: {
-              select: {
-                id: true,
-                email: true,
-                firstName: true,
-                lastName: true,
-              },
-            },
-          },
-        });
+        },
+      });
 
       if (!member) {
-        throw new NotFoundException(
-          'Member not found in this workspace',
-        );
+        throw new NotFoundException('Member not found in this workspace');
       }
 
       this.logger.log(
@@ -198,10 +339,7 @@ export class WorkspaceMembersService {
 
       return member;
     } catch (error) {
-      this.handleError(
-        error,
-        'Failed to retrieve workspace member',
-      );
+      this.handleError(error, 'Failed to retrieve workspace member');
     }
   }
 
@@ -229,20 +367,17 @@ export class WorkspaceMembersService {
       }
 
       // Verify member exists
-      const member =
-        await this.prisma.workspaceMember.findUnique({
-          where: {
-            workspaceId_userId: {
-              workspaceId,
-              userId,
-            },
+      const member = await this.prisma.workspaceMember.findUnique({
+        where: {
+          workspaceId_userId: {
+            workspaceId,
+            userId,
           },
-        });
+        },
+      });
 
       if (!member) {
-        throw new NotFoundException(
-          'Member not found in this workspace',
-        );
+        throw new NotFoundException('Member not found in this workspace');
       }
 
       // Remove member
@@ -257,9 +392,7 @@ export class WorkspaceMembersService {
 
       await this.syncWorkspaceBoardMembers(workspaceId);
 
-      this.logger.log(
-        `User ${userId} removed from workspace ${workspaceId}`,
-      );
+      this.logger.log(`User ${userId} removed from workspace ${workspaceId}`);
 
       return {
         message: 'Member removed successfully',
@@ -267,10 +400,7 @@ export class WorkspaceMembersService {
         workspaceId,
       };
     } catch (error) {
-      this.handleError(
-        error,
-        'Failed to remove member from workspace',
-      );
+      this.handleError(error, 'Failed to remove member from workspace');
     }
   }
 
@@ -281,25 +411,20 @@ export class WorkspaceMembersService {
     try {
       // Validate inputs
       if (!workspaceId || !userId) {
-        throw new BadRequestException(
-          'Workspace ID and User ID are required',
-        );
+        throw new BadRequestException('Workspace ID and User ID are required');
       }
 
-      const member =
-        await this.prisma.workspaceMember.findUnique({
-          where: {
-            workspaceId_userId: {
-              workspaceId,
-              userId,
-            },
+      const member = await this.prisma.workspaceMember.findUnique({
+        where: {
+          workspaceId_userId: {
+            workspaceId,
+            userId,
           },
-        });
+        },
+      });
 
       if (!member) {
-        throw new NotFoundException(
-          'You are not a member of this workspace',
-        );
+        throw new NotFoundException('You are not a member of this workspace');
       }
 
       if (member.role !== WorkspaceRole.OWNER) {
@@ -316,9 +441,7 @@ export class WorkspaceMembersService {
         throw error;
       }
 
-      this.logger.error(
-        `Error checking workspace ownership: ${error}`,
-      );
+      this.logger.error(`Error checking workspace ownership: ${error}`);
       throw new InternalServerErrorException(
         'Failed to verify workspace ownership',
       );
@@ -370,18 +493,14 @@ export class WorkspaceMembersService {
 
     // Handle Prisma-specific errors
     if (error instanceof PrismaClientKnownRequestError) {
-      this.logger.error(
-        `Prisma error in ${context}: ${error.message}`,
-      );
+      this.logger.error(`Prisma error in ${context}: ${error.message}`);
 
       if (error.code === 'P2025') {
         throw new NotFoundException('Resource not found');
       }
 
       if (error.code === 'P2003') {
-        throw new BadRequestException(
-          'Invalid reference to related resource',
-        );
+        throw new BadRequestException('Invalid reference to related resource');
       }
     }
 

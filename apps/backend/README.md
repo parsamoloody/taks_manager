@@ -32,6 +32,7 @@ This backend powers the Task Manager application. It is built with NestJS, Prism
 6. Swagger documentation is available at the docs endpoint for testing the API interactively.
 
 ## Setup your database
+
 Follow these steps to create a PostgreSQL user, database, and configure Prisma.
 
 #### 1. Login to PostgreSQL
@@ -119,6 +120,7 @@ Exit PostgreSQL:
 ```sql
 \q
 ```
+
 ## Environment variables
 
 Create a .env file in the backend app folder with values similar to:
@@ -130,7 +132,19 @@ DATABASE_URL=postgresql://postgres:postgres@localhost:5432/task_manager
 JWT_SECRET=your_super_secret_key
 JWT_TTL=1h
 FRONT_BASE_URL="http://localhost:5173"
+RESEND_API_KEY="re_your_api_key"
+MAIL_FROM="Task Manager <notifications@your-domain.com>"
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=
+INVITATION_TTL_HOURS=168
+PASSWORD_RESET_TTL_MINUTES=30
+TASK_REMINDER_LEAD_MINUTES=60
 ```
+
+Resend must be configured with a verified sender domain. Redis stores
+notification jobs, retries, and delayed task reminders. For the complete
+development defaults, see `.env.example`.
 
 ## Running the backend
 
@@ -211,3 +225,4 @@ curl -X POST http://localhost:8000/workspace \
 
 - The Swagger UI is the easiest way to explore the API and test protected routes.
 - If you are running the app locally, make sure PostgreSQL is available and the DATABASE_URL points to a valid database.
+- Run Redis locally before starting the backend so notification workers can process queued emails.

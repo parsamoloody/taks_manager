@@ -116,6 +116,11 @@ DATABASE_URL="postgresql://user:password@localhost:5432/task_manager"
 JWT_SECRET="some_secret"
 JWT_TTL="3600s"
 PORT="4000"
+FRONT_BASE_URL="http://localhost:3000"
+RESEND_API_KEY="re_your_api_key"
+MAIL_FROM="Task Manager <notifications@your-domain.com>"
+REDIS_HOST="localhost"
+REDIS_PORT="6379"
 ```
 
 ---
