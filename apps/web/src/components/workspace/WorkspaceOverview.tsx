@@ -55,9 +55,11 @@ export function WorkspaceOverview({
         ]}
       />
 
-      <div className="relative mt-5 overflow-hidden rounded-[32px] border border-white/10 bg-slate-900/60 p-2 shadow-[0_30px_100px_-60px_rgba(139,92,246,0.55)] sm:p-4">
-        <div className="pointer-events-none absolute -right-20 -top-28 h-80 w-80 rounded-full bg-violet-400/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 left-1/3 h-64 w-64 rounded-full bg-sky-400/10 blur-3xl" />
+      <div className="relative mt-5 rounded-[32px] border border-white/10 bg-slate-900/60 p-2 shadow-[0_30px_100px_-60px_rgba(139,92,246,0.55)] sm:p-4">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[32px]">
+          <div className="absolute -right-20 -top-28 h-80 w-80 rounded-full bg-violet-400/10 blur-3xl" />
+          <div className="absolute -bottom-24 left-1/3 h-64 w-64 rounded-full bg-sky-400/10 blur-3xl" />
+        </div>
 
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex min-w-0 items-center gap-4 sm:gap-5">
