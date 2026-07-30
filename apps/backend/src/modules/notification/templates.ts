@@ -29,6 +29,7 @@ function actionLink(label: string, url: string): string {
 
 export function workspaceInvitationTemplate(input: {
   workspaceName: string;
+  boardName?: string;
   inviterName: string;
   inviteUrl: string;
   expiresAt: string;
@@ -36,15 +37,20 @@ export function workspaceInvitationTemplate(input: {
   const workspaceName = escapeHtml(input.workspaceName);
   const inviterName = escapeHtml(input.inviterName);
   const expiry = new Date(input.expiresAt).toUTCString();
+  const destination = input.boardName
+    ? `the board <strong>${escapeHtml(input.boardName)}</strong> in <strong>${workspaceName}</strong>`
+    : `<strong>${workspaceName}</strong>`;
 
   return {
-    subject: `Invitation to join ${input.workspaceName}`,
+    subject: input.boardName
+      ? `Invitation to join ${input.boardName}`
+      : `Invitation to join ${input.workspaceName}`,
     html: layout(`
-      <p><strong>${inviterName}</strong> invited you to join <strong>${workspaceName}</strong>.</p>
+      <p><strong>${inviterName}</strong> invited you to join ${destination}.</p>
       <p style="margin:24px 0">${actionLink('Accept invitation', input.inviteUrl)}</p>
       <p style="color:#626f86;font-size:13px">This invitation expires ${escapeHtml(expiry)}.</p>
     `),
-    text: `${input.inviterName} invited you to join ${input.workspaceName}. Accept the invitation: ${input.inviteUrl}. This invitation expires ${expiry}.`,
+    text: `${input.inviterName} invited you to join ${input.boardName ? `${input.boardName} in ` : ''}${input.workspaceName}. Accept the invitation: ${input.inviteUrl}. This invitation expires ${expiry}.`,
   };
 }
 

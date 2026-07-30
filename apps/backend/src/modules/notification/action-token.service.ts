@@ -10,6 +10,7 @@ interface IssueActionTokenInput {
   ttlMs: number;
   userId?: string;
   workspaceId?: string;
+  boardId?: string;
 }
 
 @Injectable()
@@ -29,6 +30,7 @@ export class ActionTokenService {
         usedAt: null,
         ...(input.userId ? { userId: input.userId } : {}),
         ...(input.workspaceId ? { workspaceId: input.workspaceId } : {}),
+        boardId: input.boardId ?? null,
       },
     });
 
@@ -40,6 +42,7 @@ export class ActionTokenService {
         expiresAt,
         userId: input.userId,
         workspaceId: input.workspaceId,
+        boardId: input.boardId,
       },
     });
 

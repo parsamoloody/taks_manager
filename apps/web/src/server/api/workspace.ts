@@ -56,14 +56,25 @@ export function deleteWorkspace(token: string, id: string) {
   return requestJson<void>(`workspace/${id}`, { method: "DELETE", token });
 }
 
-export function addWorkspaceMember(
+export function inviteWorkspaceMember(
   token: string,
   workspaceId: string,
   payload: AddWorkspaceMemberDto,
 ) {
-  return requestJson<WorkspaceMember>(`workspaces/${workspaceId}/members`, {
+  return requestJson<{ message: string; expiresAt: string }>(
+    `workspaces/${workspaceId}/invitations`,
+    {
+      method: "POST",
+      json: payload,
+      token,
+    },
+  );
+}
+
+export function acceptWorkspaceInvitation(token: string, inviteToken: string) {
+  return requestJson<WorkspaceMember>("workspace-invitations/accept", {
     method: "POST",
-    json: payload,
+    json: { token: inviteToken },
     token,
   });
 }

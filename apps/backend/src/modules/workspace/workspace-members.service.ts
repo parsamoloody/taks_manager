@@ -31,12 +31,13 @@ export class WorkspaceMembersService {
     workspaceId: string,
     dto: AddWorkspaceMemberDto,
     currentUserId: string,
+    boardId?: string,
   ) {
     try {
       const email = dto.email.trim().toLowerCase();
       await this.ensureOwner(workspaceId, currentUserId);
 
-      const [workspace, inviter, invitedUser] = await Promise.all([
+      const [workspace, inviter, invitedUser, board] = await Promise.all([
         this.prisma.workspace.findUnique({
           where: { id: workspaceId },
           select: { name: true },
@@ -53,10 +54,20 @@ export class WorkspaceMembersService {
           where: { email },
           select: { id: true },
         }),
+        boardId
+          ? this.prisma.board.findFirst({
+              where: { id: boardId, workspaceId },
+              select: { id: true, name: true },
+            })
+          : Promise.resolve(null),
       ]);
 
       if (!workspace || !inviter) {
         throw new NotFoundException('Workspace or inviter not found');
+      }
+
+      if (boardId && !board) {
+        throw new NotFoundException('Board not found in this workspace');
       }
 
       if (invitedUser) {
@@ -69,10 +80,27 @@ export class WorkspaceMembersService {
           },
         });
 
-        if (existingMember) {
+        if (existingMember && !boardId) {
           throw new ConflictException(
             'User is already a member of this workspace',
           );
+        }
+
+        if (boardId) {
+          const existingBoardMember = await this.prisma.boardMember.findUnique({
+            where: {
+              boardId_userId: {
+                boardId,
+                userId: invitedUser.id,
+              },
+            },
+          });
+
+          if (existingBoardMember) {
+            throw new ConflictException(
+              'User already has access to this board',
+            );
+          }
         }
       }
 
@@ -82,6 +110,7 @@ export class WorkspaceMembersService {
         type: ActionTokenType.WORKSPACE_INVITATION,
         email,
         workspaceId,
+        ...(boardId ? { boardId } : {}),
         ttlMs: ttlHours * 60 * 60_000,
       });
       const inviterName =
@@ -91,17 +120,41 @@ export class WorkspaceMembersService {
       await this.notifications.sendWorkspaceInvitation({
         to: email,
         workspaceName: workspace.name,
+        ...(board?.name ? { boardName: board.name } : {}),
         inviterName,
         token,
         expiresAt: record.expiresAt,
       });
 
       return {
-        message: 'Workspace invitation queued',
+        message: boardId
+          ? 'Board invitation queued'
+          : 'Workspace invitation queued',
         expiresAt: record.expiresAt,
       };
     } catch (error) {
       this.handleError(error, 'Failed to invite workspace member');
+    }
+  }
+
+  async inviteBoardMember(
+    boardId: string,
+    dto: AddWorkspaceMemberDto,
+    currentUserId: string,
+  ) {
+    try {
+      const board = await this.prisma.board.findUnique({
+        where: { id: boardId },
+        select: { workspaceId: true },
+      });
+
+      if (!board) {
+        throw new NotFoundException('Board not found');
+      }
+
+      return this.inviteMember(board.workspaceId, dto, currentUserId, boardId);
+    } catch (error) {
+      this.handleError(error, 'Failed to invite board member');
     }
   }
 
@@ -127,6 +180,7 @@ export class WorkspaceMembersService {
       }
 
       const workspaceId = token.workspaceId;
+      const boardId = token.boardId;
       const existingMember = await this.prisma.workspaceMember.findUnique({
         where: {
           workspaceId_userId: {
@@ -136,10 +190,34 @@ export class WorkspaceMembersService {
         },
       });
 
-      if (existingMember) {
+      if (existingMember && !boardId) {
         throw new ConflictException(
           'User is already a member of this workspace',
         );
+      }
+
+      if (boardId) {
+        const board = await this.prisma.board.findFirst({
+          where: { id: boardId, workspaceId },
+          select: { id: true },
+        });
+
+        if (!board) {
+          throw new BadRequestException('Invitation board is invalid');
+        }
+
+        const existingBoardMember = await this.prisma.boardMember.findUnique({
+          where: {
+            boardId_userId: {
+              boardId,
+              userId: user.id,
+            },
+          },
+        });
+
+        if (existingBoardMember) {
+          throw new ConflictException('User already has access to this board');
+        }
       }
 
       const member = await this.prisma.$transaction(async (transaction) => {
@@ -156,12 +234,19 @@ export class WorkspaceMembersService {
           throw new BadRequestException('Token is invalid or expired');
         }
 
-        return transaction.workspaceMember.create({
-          data: {
+        const workspaceMember = await transaction.workspaceMember.upsert({
+          where: {
+            workspaceId_userId: {
+              workspaceId,
+              userId: user.id,
+            },
+          },
+          create: {
             workspaceId,
             userId: user.id,
             role: WorkspaceRole.MEMBER,
           },
+          update: {},
           include: {
             user: {
               select: {
@@ -173,6 +258,17 @@ export class WorkspaceMembersService {
             },
           },
         });
+
+        if (boardId) {
+          await transaction.boardMember.create({
+            data: {
+              boardId,
+              userId: user.id,
+            },
+          });
+        }
+
+        return workspaceMember;
       });
 
       await this.syncWorkspaceBoardMembers(workspaceId);

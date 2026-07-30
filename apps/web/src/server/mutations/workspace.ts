@@ -6,8 +6,8 @@ import {
 import { createBoard } from "~/server/api/board";
 import { getErrorMessage, isUnauthorizedError } from "~/server/api/client";
 import {
-  addWorkspaceMember,
   deleteWorkspace,
+  inviteWorkspaceMember,
   removeWorkspaceMember,
   updateWorkspace,
 } from "~/server/api/workspace";
@@ -54,11 +54,16 @@ export async function mutateWorkspace(
       return { ok: true, intent };
     }
 
-    if (intent === "add-member") {
-      await addWorkspaceMember(token, workspaceId, {
-        email: fieldTrimmedString(fields, "email"),
+    if (intent === "invite-member") {
+      const email = fieldTrimmedString(fields, "email").toLowerCase();
+      await inviteWorkspaceMember(token, workspaceId, {
+        email,
       });
-      return { ok: true, intent };
+      return {
+        ok: true,
+        intent,
+        message: `Invitation request sent to ${email}.`,
+      };
     }
 
     if (intent === "remove-member") {
@@ -73,6 +78,6 @@ export async function mutateWorkspace(
     return { ok: false, message: "Unknown action" };
   } catch (error) {
     if (isUnauthorizedError(error)) throw error;
-    return { ok: false, message: getErrorMessage(error) };
+    return { ok: false, intent, message: getErrorMessage(error) };
   }
 }

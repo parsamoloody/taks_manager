@@ -89,6 +89,7 @@ model ActionToken {
 
   userId      String?
   workspaceId String?
+  boardId     String?
 
   expiresAt DateTime
   usedAt    DateTime?
@@ -97,6 +98,8 @@ model ActionToken {
   user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  board Board? @relation(fields: [boardId], references: [id], onDelete: Cascade)
 
   @@index([email, type])
   @@index([expiresAt])
@@ -139,6 +142,8 @@ model Board {
   lists List[]
 
   labels Label[]
+
+  actionTokens ActionToken[]
 }
 
 model BoardMember {

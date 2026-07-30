@@ -51,6 +51,24 @@ export class WorkspaceInvitationsController {
   }
 
   @UseGuards(JwtGuard)
+  @Post('boards/:boardId/invitations')
+  @HttpCode(202)
+  @ApiOperation({ summary: 'Invite someone to a board by email' })
+  @ApiParam({ name: 'boardId', description: 'Board identifier' })
+  @ApiBody({ type: AddWorkspaceMemberDto })
+  inviteToBoard(
+    @Param('boardId') boardId: string,
+    @Body() dto: AddWorkspaceMemberDto,
+    @GetUser() currentUser: User,
+  ) {
+    return this.workspaceMembersService.inviteBoardMember(
+      boardId,
+      dto,
+      currentUser.id,
+    );
+  }
+
+  @UseGuards(JwtGuard)
   @Post('workspace-invitations/accept')
   @HttpCode(200)
   @ApiOperation({ summary: 'Accept a workspace invitation' })

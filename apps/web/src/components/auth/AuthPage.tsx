@@ -36,16 +36,29 @@ function AuthPageContent({ mode }: AuthPageProps) {
   const mutation = useMutation<AuthActionData>();
   const isSubmitting = mutation.state !== "idle";
   const passwordWasReset = isLogin && router.query.passwordReset === "success";
+  const returnTo =
+    typeof router.query.returnTo === "string" &&
+    router.query.returnTo.startsWith("/") &&
+    !router.query.returnTo.startsWith("//")
+      ? router.query.returnTo
+      : "";
+  const alternatePath = isLogin ? "/signup" : "/login";
+  const alternateHref = returnTo
+    ? `${alternatePath}?returnTo=${encodeURIComponent(returnTo)}`
+    : alternatePath;
 
   return (
     <AuthLayout
       eyebrow={isLogin ? "Welcome back" : "Create your account"}
       action={{
-        href: isLogin ? "/signup" : "/login",
+        href: alternateHref,
         label: isLogin ? "Create account" : "Sign in",
       }}
     >
       <MutationForm mutation={mutation} className="mt-8 space-y-5">
+        {returnTo ? (
+          <input type="hidden" name="returnTo" value={returnTo} />
+        ) : null}
         {passwordWasReset ? (
           <div
             role="status"

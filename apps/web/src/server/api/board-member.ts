@@ -20,6 +20,21 @@ export function addBoardMember(
   });
 }
 
+export function inviteBoardMember(
+  token: string,
+  boardId: string,
+  email: string,
+) {
+  return requestJson<{ message: string; expiresAt: string }>(
+    `boards/${boardId}/invitations`,
+    {
+      method: "POST",
+      token,
+      json: { email },
+    },
+  );
+}
+
 export function removeBoardMember(
   token: string,
   boardId: string,

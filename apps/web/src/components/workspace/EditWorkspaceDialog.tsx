@@ -4,6 +4,7 @@ import { Avatar } from "~/components/ui/Avatar";
 import { Button } from "~/components/ui/Button";
 import { Modal } from "~/components/ui/Modal";
 import { FormInput } from "~/components/ui/FormField";
+import { Notification } from "~/components/ui/Notification";
 import type { Workspace } from "~/server/api/workspace";
 import { MutationForm, useMutation } from "~/modules/mutations/client";
 
@@ -35,7 +36,9 @@ export function EditWorkspaceDialog({
     if (mutation.state !== "idle" || !mutation.data?.ok) return;
 
     if (mutation.data.intent === "update-workspace") onClose();
-    if (mutation.data.intent === "add-member") inviteFormRef.current?.reset();
+    if (mutation.data.intent === "invite-member") {
+      inviteFormRef.current?.reset();
+    }
   }, [mutation.state, mutation.data, onClose]);
 
   return (
@@ -74,7 +77,7 @@ export function EditWorkspaceDialog({
         <section className="border-t border-white/10 pt-5">
           <h3 className="text-sm font-semibold text-white">Members</h3>
           <p className="mt-1 text-sm text-slate-400">
-            Invite people who already have an account.
+            Send an email invitation to join this workspace.
           </p>
 
           <MutationForm
@@ -82,7 +85,7 @@ export function EditWorkspaceDialog({
             ref={inviteFormRef}
             className="mt-3 flex flex-col gap-2 sm:flex-row"
           >
-            <input type="hidden" name="intent" value="add-member" />
+            <input type="hidden" name="intent" value="invite-member" />
             <FormInput
               name="email"
               type="email"
@@ -95,6 +98,15 @@ export function EditWorkspaceDialog({
               Invite
             </Button>
           </MutationForm>
+
+          {mutation.data?.intent === "invite-member" ? (
+            <Notification
+              tone={mutation.data.ok ? "success" : "error"}
+              className="mt-3"
+            >
+              {mutation.data.message}
+            </Notification>
+          ) : null}
 
           <ul className="mt-4 space-y-2">
             {workspace.members.map((member) => (
@@ -140,11 +152,13 @@ export function EditWorkspaceDialog({
           </ul>
         </section>
 
-        {mutation.data && !mutation.data.ok && (
+        {mutation.data &&
+        !mutation.data.ok &&
+        mutation.data.intent !== "invite-member" ? (
           <p role="alert" className="text-sm text-rose-400">
             {mutation.data.message}
           </p>
-        )}
+        ) : null}
       </div>
     </Modal>
   );

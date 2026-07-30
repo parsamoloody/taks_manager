@@ -13,6 +13,7 @@ export class NotificationService {
   async sendWorkspaceInvitation(input: {
     to: string;
     workspaceName: string;
+    boardName?: string;
     inviterName: string;
     token: string;
     expiresAt: Date;
@@ -20,6 +21,7 @@ export class NotificationService {
     await this.queue.enqueueWorkspaceInvitation({
       to: input.to,
       workspaceName: input.workspaceName,
+      ...(input.boardName ? { boardName: input.boardName } : {}),
       inviterName: input.inviterName,
       inviteUrl: this.frontendUrl('/invitations/accept', input.token),
       expiresAt: input.expiresAt.toISOString(),

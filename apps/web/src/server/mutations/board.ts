@@ -1,5 +1,8 @@
 import { BoardVisibility, TaskStatus, type TaskPriority } from "@repo/shared";
-import { addBoardMember, removeBoardMember } from "~/server/api/board-member";
+import {
+  inviteBoardMember,
+  removeBoardMember,
+} from "~/server/api/board-member";
 import { updateBoard } from "~/server/api/board";
 import { getErrorMessage, isUnauthorizedError } from "~/server/api/client";
 import { createLabel, deleteLabel, updateLabel } from "~/server/api/label";
@@ -126,11 +129,14 @@ export async function mutateBoard(
         return { ok: true, intent };
       }
 
-      case "addBoardMember": {
-        await addBoardMember(token, boardId, {
-          email: fieldTrimmedString(fields, "email"),
-        });
-        return { ok: true, intent };
+      case "inviteBoardMember": {
+        const email = fieldTrimmedString(fields, "email").toLowerCase();
+        await inviteBoardMember(token, boardId, email);
+        return {
+          ok: true,
+          intent,
+          message: `Invitation request sent to ${email}.`,
+        };
       }
 
       case "removeBoardMember": {
@@ -164,6 +170,6 @@ export async function mutateBoard(
     }
   } catch (error) {
     if (isUnauthorizedError(error)) throw error;
-    return { ok: false, message: getErrorMessage(error) };
+    return { ok: false, intent, message: getErrorMessage(error) };
   }
 }

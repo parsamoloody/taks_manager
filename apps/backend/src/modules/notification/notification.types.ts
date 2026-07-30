@@ -9,6 +9,7 @@ export enum NotificationJobName {
 export interface WorkspaceInvitationJob {
   to: string;
   workspaceName: string;
+  boardName?: string;
   inviterName: string;
   inviteUrl: string;
   expiresAt: string;

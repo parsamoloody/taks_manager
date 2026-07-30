@@ -1,8 +1,10 @@
+import { useEffect, useRef } from "react";
 import { HiOutlineTrash } from "react-icons/hi";
 import type { Board } from "~/server/api/board";
 import { Avatar } from "~/components/ui/Avatar";
 import { Button } from "~/components/ui/Button";
 import { FormInput } from "~/components/ui/FormField";
+import { Notification } from "~/components/ui/Notification";
 import { MutationForm, useMutation } from "~/modules/mutations/client";
 
 interface BoardMembersSettingsProps {
@@ -18,6 +20,13 @@ export function BoardMembersSettings({
 }: BoardMembersSettingsProps) {
   const inviteMutation = useMutation<{ ok: boolean; message?: string }>();
   const removeMutation = useMutation<{ ok: boolean; message?: string }>();
+  const inviteFormRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (inviteMutation.state === "idle" && inviteMutation.data?.ok) {
+      inviteFormRef.current?.reset();
+    }
+  }, [inviteMutation.state, inviteMutation.data]);
 
   return (
     <section className="border-t border-white/10 pt-6">
@@ -49,38 +58,40 @@ export function BoardMembersSettings({
 
       {visibility === "WORKSPACE" ? (
         <div className="mt-4 rounded-xl border border-sky-400/20 bg-sky-400/10 px-3 py-2.5 text-xs leading-5 text-sky-200">
-          Access is inherited from the workspace. Switch visibility to Private
-          before managing individual members, or invite member to the workspace.
+          This board inherits workspace access. Accepting this invitation will
+          add the person to the workspace.
         </div>
       ) : null}
 
       <MutationForm
         mutation={inviteMutation}
+        ref={inviteFormRef}
         className="mt-4 flex flex-col items-stretch gap-2 sm:flex-row sm:items-end"
       >
-        <input type="hidden" name="intent" value="addBoardMember" />
+        <input type="hidden" name="intent" value="inviteBoardMember" />
         <FormInput
           name="email"
           type="email"
           label="Invite by email"
           required
-          disabled={visibility === "WORKSPACE"}
           placeholder="name@example.com"
           wrapperClassName="min-w-0 flex-1"
         />
         <Button
           type="submit"
           variant="secondary"
-          disabled={visibility === "WORKSPACE"}
           isLoading={inviteMutation.state !== "idle"}
         >
           Invite
         </Button>
       </MutationForm>
-      {inviteMutation.data && !inviteMutation.data.ok ? (
-        <p role="alert" className="mt-2 text-xs text-rose-400">
+      {inviteMutation.data ? (
+        <Notification
+          tone={inviteMutation.data.ok ? "success" : "error"}
+          className="mt-3"
+        >
           {inviteMutation.data.message}
-        </p>
+        </Notification>
       ) : null}
 
       <ul className="mt-4 max-h-48 space-y-2 overflow-y-auto pr-1">
