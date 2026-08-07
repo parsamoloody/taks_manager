@@ -68,7 +68,7 @@ export function TaskPriorityPicker({
           aria-haspopup="listbox"
           aria-expanded={open}
           aria-controls={listboxId}
-          className="flex min-h-11 w-full cursor-pointer items-center justify-between gap-3 rounded-xl border px-3 py-2.5 text-left outline-none transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-sky-400/30"
+          className="flex min-h-11 w-full cursor-pointer items-center justify-between gap-3 rounded-xl border px-3 py-2.5 text-left outline-none transition-colors duration-100 motion-reduce:transition-none hover:brightness-110 focus-visible:ring-2 focus-visible:ring-sky-400/30"
           style={{
             borderColor: `${selected.color}70`,
             backgroundColor: `${selected.color}20`,
@@ -94,7 +94,7 @@ export function TaskPriorityPicker({
             </span>
           </span>
           <HiChevronDown
-            className={`h-4 w-4 shrink-0 text-slate-400 transition-transform ${open ? "rotate-180" : ""}`}
+            className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-100 motion-reduce:transition-none ${open ? "rotate-180" : ""}`}
           />
         </button>
 
@@ -104,7 +104,7 @@ export function TaskPriorityPicker({
             ref={listboxRef}
             role="listbox"
             aria-label="Task priority"
-            className="absolute bottom-full left-0 right-0 z-30 mb-2 overflow-hidden rounded-xl border border-white/10 bg-slate-950/95 p-1.5 shadow-2xl backdrop-blur-xl"
+            className="absolute bottom-full left-0 right-0 z-30 mb-2 overflow-hidden rounded-xl border border-white/10 bg-slate-950/98 p-1.5 shadow-[0_24px_60px_-18px_rgba(0,0,0,0.85)]"
           >
             <div className="space-y-1">
               {Object.values(TaskPriority).map((option) => {
@@ -118,7 +118,7 @@ export function TaskPriorityPicker({
                     aria-selected={isSelected}
                     tabIndex={-1}
                     onClick={() => selectPriority(option)}
-                    className={`flex w-full cursor-pointer items-center gap-3 rounded-md px-2.5 py-2 text-left outline-none transition hover:bg-white/[0.07] focus-visible:bg-white/[0.07] ${isSelected ? "bg-white/[0.05]" : ""}`}
+                    className={`flex w-full cursor-pointer items-center gap-3 rounded-md px-2.5 py-2 text-left outline-none transition-colors duration-100 motion-reduce:transition-none hover:bg-white/[0.07] focus-visible:bg-white/[0.07] ${isSelected ? "bg-white/[0.05]" : ""}`}
                   >
                     <span
                       className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md"

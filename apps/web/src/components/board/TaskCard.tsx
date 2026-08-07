@@ -90,7 +90,7 @@ function TaskCardComponent({
       onDragEnd={onDragEnd}
       onDragOver={(event) => event.preventDefault()}
       onDrop={() => onDrop(index)}
-      className={`task-card group rounded-2xl border p-3 transition focus-within:border-sky-300/35 ${cardUrgencyClass} ${
+      className={`task-card group rounded-2xl border p-3 transition-colors duration-100 motion-reduce:transition-none focus-within:border-sky-300/35 ${cardUrgencyClass} ${
         isToggling ? "opacity-60" : ""
       } ${isDragging ? "border-sky-300/45 bg-sky-400/[0.12] shadow-[0_0_0_1px_rgba(125,211,252,0.18)]" : ""}`}
     >
@@ -108,10 +108,10 @@ function TaskCardComponent({
             type="submit"
             disabled={isToggling}
             aria-label={isDone ? "Mark as pending" : "Mark as done"}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl outline-none transition hover:bg-white/[0.05] focus-visible:ring-2 focus-visible:ring-sky-300 disabled:cursor-wait"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl outline-none transition-colors duration-100 motion-reduce:transition-none hover:bg-white/[0.05] focus-visible:ring-2 focus-visible:ring-sky-300 disabled:cursor-wait"
           >
             <span
-              className={`flex h-5 w-5 items-center justify-center rounded-full border transition ${
+              className={`flex h-5 w-5 items-center justify-center rounded-full border transition-colors duration-100 motion-reduce:transition-none ${
                 isDone
                   ? "border-emerald-400 bg-emerald-400/80 text-slate-950"
                   : "border-slate-500 group-hover:border-slate-400"

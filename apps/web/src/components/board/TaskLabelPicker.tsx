@@ -65,7 +65,7 @@ export function TaskLabelPicker({
                 type="button"
                 onClick={() => removeLabel(label.id)}
                 aria-label={`Remove ${label.name}`}
-                className="ml-0.5 cursor-pointer rounded-full p-0.5 text-slate-400 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
+                className="ml-0.5 cursor-pointer rounded-full p-0.5 text-slate-400 transition-colors duration-100 motion-reduce:transition-none hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
               >
                 <HiOutlineX className="h-3.5 w-3.5" />
               </button>
@@ -87,7 +87,7 @@ export function TaskLabelPicker({
             aria-haspopup="listbox"
             aria-expanded={open}
             aria-controls={listboxId}
-            className="flex min-h-11 w-full cursor-pointer items-center justify-between gap-3 rounded-xl border border-white/10 bg-slate-950/60 px-3 py-2.5 text-left text-sm text-slate-300 outline-none transition hover:border-white/20 hover:bg-slate-950/80 focus-visible:border-sky-400/50 focus-visible:ring-2 focus-visible:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex min-h-11 w-full cursor-pointer items-center justify-between gap-3 rounded-xl border border-white/10 bg-slate-950/60 px-3 py-2.5 text-left text-sm text-slate-300 outline-none transition-colors duration-100 motion-reduce:transition-none hover:border-white/20 hover:bg-slate-950/80 focus-visible:border-sky-400/50 focus-visible:ring-2 focus-visible:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <span className="flex items-center gap-2">
               <span className="flex h-5 w-5 items-center justify-center rounded-md bg-white/5 text-slate-400">
@@ -96,7 +96,7 @@ export function TaskLabelPicker({
               {availableLabels.length ? "Add a label" : "All labels selected"}
             </span>
             <HiChevronDown
-              className={`h-4 w-4 text-slate-500 transition-transform ${open ? "rotate-180" : ""}`}
+              className={`h-4 w-4 text-slate-500 transition-transform duration-100 motion-reduce:transition-none ${open ? "rotate-180" : ""}`}
             />
           </button>
 
@@ -106,7 +106,7 @@ export function TaskLabelPicker({
               id={listboxId}
               role="listbox"
               aria-label="Available labels"
-              className="absolute bottom-full left-0 right-0 z-30 mb-2 overflow-hidden rounded-xl border border-white/10 bg-slate-950/95 p-1.5 shadow-2xl backdrop-blur-xl"
+              className="absolute bottom-full left-0 right-0 z-30 mb-2 overflow-hidden rounded-xl border border-white/10 bg-slate-950/98 p-1.5 shadow-[0_24px_60px_-18px_rgba(0,0,0,0.85)]"
             >
               <p className="px-2 pb-1.5 pt-1 text-[11px] font-medium uppercase tracking-wider text-slate-500">
                 Choose labels
@@ -120,7 +120,7 @@ export function TaskLabelPicker({
                     aria-selected="false"
                     tabIndex={-1}
                     onClick={() => addLabel(label.id)}
-                    className="group flex w-full cursor-pointer items-center gap-3 rounded-md px-2.5 py-2 text-left transition hover:bg-white/[0.07] focus-visible:bg-white/[0.07] focus-visible:outline-none"
+                    className="group flex w-full cursor-pointer items-center gap-3 rounded-md px-2.5 py-2 text-left transition-colors duration-100 motion-reduce:transition-none hover:bg-white/[0.07] focus-visible:bg-white/[0.07] focus-visible:outline-none"
                   >
                     <span
                       className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md"
@@ -134,7 +134,7 @@ export function TaskLabelPicker({
                     <span className="min-w-0 flex-1 truncate text-sm font-medium text-slate-200">
                       {label.name}
                     </span>
-                    <HiOutlinePlus className="h-4 w-4 text-slate-600 transition group-hover:text-sky-300" />
+                    <HiOutlinePlus className="h-4 w-4 text-slate-600 transition-colors duration-100 motion-reduce:transition-none group-hover:text-sky-300" />
                   </button>
                 ))}
               </div>
