@@ -27,7 +27,7 @@ export function WorkspaceHeader({
   ).size;
 
   return (
-    <header className="relative overflow-hidden rounded-[32px] border border-white/10 bg-slate-900/55 p-6 shadow-[0_30px_100px_-60px_rgba(56,189,248,0.65)] sm:p-8">
+    <header className="relative overflow-hidden rounded-[32px] border border-white/10 bg-slate-900/55 p-4 sm:p-6">
       <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-sky-400/10 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-32 left-1/3 h-64 w-64 rounded-full bg-violet-500/10 blur-3xl" />
 
