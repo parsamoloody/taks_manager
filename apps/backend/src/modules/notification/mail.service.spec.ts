@@ -1,7 +1,7 @@
 import { ResendMailService } from './mail.service';
 
 describe('ResendMailService', () => {
-  it('allows the application to start without a Resend API key', async () => {
+  it('skips delivery and resolves when the Resend API key is missing', async () => {
     const config = {
       get: jest.fn((key: string) =>
         key === 'mail.from' ? 'Task Manager <test@example.com>' : undefined,
@@ -17,6 +17,6 @@ describe('ResendMailService', () => {
         html: '<p>Test</p>',
         text: 'Test',
       }),
-    ).rejects.toThrow('RESEND_API_KEY is not configured');
+    ).resolves.toBeUndefined();
   });
 });

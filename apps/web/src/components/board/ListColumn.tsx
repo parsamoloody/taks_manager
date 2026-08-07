@@ -23,6 +23,16 @@ interface ListColumnProps {
   onOpenTask: (task: Task) => void;
   onAddTask: (listId: string) => void;
   onEditList: (list: List) => void;
+  onReorderTask: (
+    sourceListId: string,
+    targetListId: string,
+    movedTaskId: string,
+    targetOrder: number,
+  ) => void;
+  draggingTaskId: string | null;
+  draggingSourceListId: string | null;
+  onDragStart: (taskId: string, listId: string) => void;
+  onDragEnd: () => void;
 }
 
 function ListColumnComponent({
@@ -34,6 +44,11 @@ function ListColumnComponent({
   onOpenTask,
   onAddTask,
   onEditList,
+  onReorderTask,
+  draggingTaskId,
+  draggingSourceListId,
+  onDragStart,
+  onDragEnd,
 }: ListColumnProps) {
   const mutation = useMutation<{ ok: boolean; message?: string }>();
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -58,6 +73,15 @@ function ListColumnComponent({
       <article
         aria-labelledby={`list-${list.id}-title`}
         aria-busy={isDeleting || undefined}
+        onDragOver={(event) => event.preventDefault()}
+        onDrop={() =>
+          onReorderTask(
+            draggingSourceListId ?? list.id,
+            list.id,
+            draggingTaskId ?? "",
+            tasks.length,
+          )
+        }
         className={`group flex h-full min-h-0 w-[min(20rem,calc(100vw-2rem))] shrink-0 snap-start flex-col overflow-hidden rounded-[22px] border border-white/10 bg-slate-900/75 shadow-[0_22px_60px_-38px_rgba(0,0,0,0.9)] sm:w-80 ${
           isDeleting ? "pointer-events-none opacity-40" : ""
         }`}
@@ -108,12 +132,24 @@ function ListColumnComponent({
         </header>
 
         <div className="board-scrollbar min-h-0 flex-1 space-y-2.5 overflow-y-auto overscroll-contain p-3">
-          {tasks.map((task) => (
+          {tasks.map((task, index) => (
             <TaskCard
               key={task.id}
               task={task}
+              index={index}
               membersById={membersById}
               onOpen={onOpenTask}
+              onDragStart={onDragStart}
+              onDragEnd={onDragEnd}
+              onDrop={(targetOrder) =>
+                onReorderTask(
+                  draggingSourceListId ?? list.id,
+                  list.id,
+                  draggingTaskId ?? "",
+                  targetOrder,
+                )
+              }
+              isDragging={draggingTaskId === task.id}
             />
           ))}
 

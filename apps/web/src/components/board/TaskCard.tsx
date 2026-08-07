@@ -14,8 +14,13 @@ import { getTaskDueInfo, reminderTitle } from "~/lib/taskDue";
 
 interface TaskCardProps {
   task: Task;
+  index: number;
   membersById: Readonly<Record<string, MemberUser>>;
   onOpen: (task: Task) => void;
+  onDragStart: (taskId: string, listId: string) => void;
+  onDragEnd: () => void;
+  onDrop: (targetOrder: number) => void;
+  isDragging: boolean;
 }
 
 const DATE_FORMATTER = new Intl.DateTimeFormat("en", {
@@ -29,7 +34,16 @@ function formatDate(value?: string | null) {
   return DATE_FORMATTER.format(new Date(value));
 }
 
-function TaskCardComponent({ task, membersById, onOpen }: TaskCardProps) {
+function TaskCardComponent({
+  task,
+  index,
+  membersById,
+  onOpen,
+  onDragStart,
+  onDragEnd,
+  onDrop,
+  isDragging,
+}: TaskCardProps) {
   const mutation = useMutation<{ ok: boolean; message?: string }>();
   const isDone = task.status === TaskStatus.DONE;
   const isToggling =
@@ -68,9 +82,17 @@ function TaskCardComponent({ task, membersById, onOpen }: TaskCardProps) {
   return (
     <article
       aria-busy={isToggling || undefined}
+      draggable
+      onDragStart={(event) => {
+        event.dataTransfer.effectAllowed = "move";
+        onDragStart(task.id, task.listId);
+      }}
+      onDragEnd={onDragEnd}
+      onDragOver={(event) => event.preventDefault()}
+      onDrop={() => onDrop(index)}
       className={`task-card group rounded-2xl border p-3 transition focus-within:border-sky-300/35 ${cardUrgencyClass} ${
         isToggling ? "opacity-60" : ""
-      }`}
+      } ${isDragging ? "border-sky-300/45 bg-sky-400/[0.12] shadow-[0_0_0_1px_rgba(125,211,252,0.18)]" : ""}`}
     >
       <div className="flex items-start gap-1.5">
         <MutationForm mutation={mutation}>

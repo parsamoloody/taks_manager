@@ -10,6 +10,7 @@ export abstract class MailService {
 
 @Injectable()
 export class ResendMailService extends MailService {
+  private readonly logger = new Logger(ResendMailService.name);
   private resend?: Resend;
   private readonly from: string;
 
@@ -23,17 +24,28 @@ export class ResendMailService extends MailService {
   async send(message: MailMessage): Promise<void> {
     const apiKey = this.config.get<string>('mail.resendApiKey');
     if (!apiKey) {
-      throw new Error('RESEND_API_KEY is not configured');
+      this.logger.warn(
+        'RESEND_API_KEY is not configured. Skipping email delivery for %s.',
+        message.to,
+      );
+      return;
     }
 
-    this.resend ??= new Resend(apiKey);
-    const { error } = await this.resend.emails.send({
-      from: this.from,
-      ...message,
-    });
+    try {
+      this.resend ??= new Resend(apiKey);
+      const { error } = await this.resend.emails.send({
+        from: this.from,
+        ...message,
+      });
 
-    if (error) {
-      throw new Error(`Resend rejected the email: ${error.message}`);
+      if (error) {
+        throw new Error(`Resend rejected the email: ${error.message}`);
+      }
+    } catch (error) {
+      this.logger.error(
+        `Failed to send email to ${String(message.to)}: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      throw error;
     }
   }
 }

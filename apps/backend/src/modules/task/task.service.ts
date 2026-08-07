@@ -9,8 +9,10 @@ import {
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 
-import type { CreateTaskDto, UpdateTaskDto } from './dto/task.dto';
+import type { CreateTaskDto, UpdateTaskDto, ImproveTaskDto, ReorderTasksDto } from './dto/task.dto';
 import { NotificationService } from '../notification/notification.service';
+import { TaskAiService } from './task-ai.service';
+import { buildTaskOrderPlan } from './task-ordering';
 
 @Injectable()
 export class TaskService {
@@ -19,6 +21,7 @@ export class TaskService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationService,
+    private readonly taskAiService: TaskAiService,
   ) {}
 
   async create(
@@ -81,7 +84,7 @@ export class TaskService {
         },
       });
 
-      await this.syncTaskReminder(task);
+      void this.syncTaskReminder(task);
       this.logger.log(`Task created successfully: ${task.id}`);
       return task;
     } catch (error) {
@@ -244,11 +247,137 @@ export class TaskService {
         },
       });
 
-      await this.syncTaskReminder(updatedTask);
+      void this.syncTaskReminder(updatedTask);
       this.logger.log(`Task updated successfully: ${taskId}`);
       return updatedTask;
     } catch (error) {
       this.handleError(error, 'Failed to update task');
+    }
+  }
+
+  async improveTask(
+    boardId: string,
+    listId: string,
+    taskId: string,
+    userId: string,
+    dto: ImproveTaskDto,
+  ) {
+    try {
+      if (!boardId || !listId || !taskId || !userId) {
+        throw new BadRequestException(
+          'Board ID, List ID, Task ID, and User ID are required',
+        );
+      }
+
+      if (!dto?.mode || !['fix', 'enhance'].includes(dto.mode)) {
+        throw new BadRequestException('A valid AI mode is required');
+      }
+
+      await this.ensureBoardAccess(boardId, userId);
+      await this.ensureListInBoard(boardId, listId);
+
+      const existingTask = await this.prisma.task.findFirst({
+        where: {
+          id: taskId,
+          listId,
+        },
+      });
+
+      if (!existingTask) {
+        throw new NotFoundException('Task not found');
+      }
+
+      return this.taskAiService.improveTask({
+        mode: dto.mode,
+        title: dto.title ?? existingTask.title,
+        description: dto.description ?? existingTask.description ?? '',
+      });
+    } catch (error) {
+      this.handleError(error, 'Failed to improve task');
+    }
+  }
+
+  async reorderTasks(boardId: string, userId: string, dto: ReorderTasksDto) {
+    try {
+      if (!boardId || !userId) {
+        throw new BadRequestException('Board ID and User ID are required');
+      }
+
+      if (!dto?.movedTaskId || !dto?.sourceListId || !dto?.targetListId) {
+        throw new BadRequestException('Source, target, and moved task IDs are required');
+      }
+
+      if (!Number.isInteger(dto.targetOrder)) {
+        throw new BadRequestException('Task order must be an integer');
+      }
+
+      await this.ensureBoardAccess(boardId, userId);
+      await this.ensureListInBoard(boardId, dto.sourceListId);
+      await this.ensureListInBoard(boardId, dto.targetListId);
+
+      const existingTask = await this.prisma.task.findFirst({
+        where: {
+          id: dto.movedTaskId,
+          listId: dto.sourceListId,
+        },
+      });
+
+      if (!existingTask) {
+        throw new NotFoundException('Task not found');
+      }
+
+      const [sourceTasks, targetTasks] = await Promise.all([
+        this.prisma.task.findMany({
+          where: { listId: dto.sourceListId },
+          orderBy: { order: 'asc' },
+        }),
+        this.prisma.task.findMany({
+          where: { listId: dto.targetListId },
+          orderBy: { order: 'asc' },
+        }),
+      ]);
+
+      const safeTargetOrder = Math.max(
+        0,
+        Math.min(dto.targetOrder, dto.sourceListId === dto.targetListId ? sourceTasks.length : targetTasks.length),
+      );
+
+      const plan = buildTaskOrderPlan({
+        sourceListId: dto.sourceListId,
+        sourceTasks: sourceTasks.map((task) => ({
+          id: task.id,
+          listId: task.listId,
+          order: task.order,
+        })),
+        targetListId: dto.targetListId,
+        targetTasks: targetTasks.map((task) => ({
+          id: task.id,
+          listId: task.listId,
+          order: task.order,
+        })),
+        movedTaskId: dto.movedTaskId,
+        targetOrder: safeTargetOrder,
+      });
+
+      await this.prisma.$transaction(
+        plan.map((item) =>
+          this.prisma.task.update({
+            where: { id: item.id },
+            data: {
+              listId: item.listId,
+              order: item.order,
+            },
+          }),
+        ),
+      );
+
+      this.logger.log(`Tasks reordered successfully for board ${boardId}`);
+      return {
+        ok: true,
+        updatedTaskIds: plan.map((item) => item.id),
+      };
+    } catch (error) {
+      this.handleError(error, 'Failed to reorder tasks');
     }
   }
 
@@ -283,7 +412,7 @@ export class TaskService {
         where: { id: taskId },
       });
 
-      await this.cancelTaskReminder(taskId);
+      void this.cancelTaskReminder(taskId);
       this.logger.log(`Task deleted successfully: ${taskId}`);
       return {
         message: 'Task deleted successfully',

@@ -15,7 +15,7 @@ import { HeaderActionPortal } from "~/components/layout/HeaderActionPortal";
 import { Badge } from "~/components/ui/Badge";
 import { Breadcrumb } from "~/components/ui/Breadcrumb";
 import { GroupMembers } from "~/components/ui/GroupMembers";
-import { MutationProvider } from "~/modules/mutations/client";
+import { MutationProvider, useMutation } from "~/modules/mutations/client";
 import { getBoard, type Board, type BoardDetailList } from "~/server/api/board";
 import type { List } from "~/server/api/list";
 import type { Task } from "~/server/api/task";
@@ -82,14 +82,16 @@ export const getServerSideProps: GetServerSideProps<BoardPageProps> = async (
     return { user, board };
   });
 
-export default function BoardPage({ board, user }: BoardPageProps) {
+function BoardPageContent({ board, user }: BoardPageProps) {
+  const mutation = useMutation<{ ok: boolean; message?: string }>();
   const [createTaskListId, setCreateTaskListId] = useState<string | null>(null);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [editingList, setEditingList] = useState<List | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [query, setQuery] = useState("");
-
-  const lists = board.lists ?? EMPTY_LISTS;
+  const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
+  const [draggingSourceListId, setDraggingSourceListId] = useState<string | null>(null);
+  const [lists, setLists] = useState(board.lists ?? EMPTY_LISTS);
   const labels = board.labels ?? [];
   const members = board.members;
   const allTasks = useMemo(
@@ -141,6 +143,112 @@ export default function BoardPage({ board, user }: BoardPageProps) {
   }));
   const nextListOrder =
     lists.reduce((highest, list) => Math.max(highest, list.order), -1) + 1;
+
+  function applyTaskOrderPlan(
+    currentLists: typeof lists,
+    sourceListId: string,
+    targetListId: string,
+    movedTaskId: string,
+    targetOrder: number,
+  ) {
+    const sourceList = currentLists.find((list) => list.id === sourceListId);
+    const targetList = currentLists.find((list) => list.id === targetListId);
+
+    if (!sourceList || !targetList || !movedTaskId) {
+      return currentLists;
+    }
+
+    const sourceTasks = [...sourceList.tasks].sort((a, b) => a.order - b.order);
+    const targetTasks = [...targetList.tasks].sort((a, b) => a.order - b.order);
+    const movedTask = sourceTasks.find((task) => task.id === movedTaskId);
+
+    if (!movedTask) {
+      return currentLists;
+    }
+
+    const safeTargetOrder = Math.max(
+      0,
+      Math.min(targetOrder, sourceListId === targetListId ? sourceTasks.length : targetTasks.length),
+    );
+
+    if (sourceListId === targetListId) {
+      const withoutMoved = sourceTasks.filter((task) => task.id !== movedTaskId);
+      const reordered = [
+        ...withoutMoved.slice(0, safeTargetOrder),
+        movedTask,
+        ...withoutMoved.slice(safeTargetOrder),
+      ];
+
+      return currentLists.map((list) =>
+        list.id === sourceListId
+          ? {
+              ...list,
+              tasks: reordered.map((task, index) => ({ ...task, order: index + 1 })),
+            }
+          : list,
+      );
+    }
+
+    const sourceWithoutMoved = sourceTasks.filter((task) => task.id !== movedTaskId);
+    const targetWithoutMoved = targetTasks.filter((task) => task.id !== movedTaskId);
+    const nextTargetTasks = [
+      ...targetWithoutMoved.slice(0, safeTargetOrder),
+      { ...movedTask, listId: targetListId },
+      ...targetWithoutMoved.slice(safeTargetOrder),
+    ];
+
+    return currentLists.map((list) => {
+      if (list.id === sourceListId) {
+        return {
+          ...list,
+          tasks: sourceWithoutMoved.map((task, index) => ({ ...task, order: index + 1 })),
+        };
+      }
+
+      if (list.id === targetListId) {
+        return {
+          ...list,
+          tasks: nextTargetTasks.map((task, index) => ({ ...task, order: index + 1 })),
+        };
+      }
+
+      return list;
+    });
+  }
+
+  async function handleReorderTask(
+    sourceListId: string,
+    targetListId: string,
+    movedTaskId: string,
+    targetOrder: number,
+  ) {
+    if (!movedTaskId) return;
+
+    const previousLists = lists;
+    const optimisticLists = applyTaskOrderPlan(
+      previousLists,
+      sourceListId,
+      targetListId,
+      movedTaskId,
+      targetOrder,
+    );
+
+    setDraggingTaskId(null);
+    setDraggingSourceListId(null);
+    setLists(optimisticLists);
+
+    const result = await mutation.submit({
+      intent: "reorderTask",
+      sourceListId,
+      targetListId,
+      movedTaskId,
+      targetOrder,
+    });
+
+    if (!result?.ok) {
+      setLists(previousLists);
+    }
+  }
   const activeListTasks = createTaskListId
     ? (lists.find((list) => list.id === createTaskListId)?.tasks ?? EMPTY_TASKS)
     : EMPTY_TASKS;
@@ -151,7 +259,7 @@ export default function BoardPage({ board, user }: BoardPageProps) {
     ) + 1;
 
   return (
-    <MutationProvider endpoint={`/api/mutations/boards/${board.id}`}>
+    <>
       <Head>
         <title>{board.name} · Tsk Manager</title>
         <meta
@@ -269,6 +377,17 @@ export default function BoardPage({ board, user }: BoardPageProps) {
                 onOpenTask={setActiveTask}
                 onAddTask={setCreateTaskListId}
                 onEditList={setEditingList}
+                onReorderTask={handleReorderTask}
+                draggingTaskId={draggingTaskId}
+                draggingSourceListId={draggingSourceListId}
+                onDragStart={(taskId, listId) => {
+                  setDraggingTaskId(taskId);
+                  setDraggingSourceListId(listId);
+                }}
+                onDragEnd={() => {
+                  setDraggingTaskId(null);
+                  setDraggingSourceListId(null);
+                }}
               />
             ))}
 
@@ -300,6 +419,7 @@ export default function BoardPage({ board, user }: BoardPageProps) {
         {activeTask ? (
           <TaskDetailDialog
             task={activeTask}
+            boardId={board.id}
             labels={labels}
             members={members}
             onClose={() => setActiveTask(null)}
@@ -313,6 +433,14 @@ export default function BoardPage({ board, user }: BoardPageProps) {
           />
         ) : null}
       </main>
+    </>
+  );
+}
+
+export default function BoardPage(props: BoardPageProps) {
+  return (
+    <MutationProvider endpoint={`/api/mutations/boards/${props.board.id}`}>
+      <BoardPageContent {...props} />
     </MutationProvider>
   );
 }

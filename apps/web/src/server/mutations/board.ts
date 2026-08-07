@@ -7,7 +7,7 @@ import { updateBoard } from "~/server/api/board";
 import { getErrorMessage, isUnauthorizedError } from "~/server/api/client";
 import { createLabel, deleteLabel, updateLabel } from "~/server/api/label";
 import { createList, deleteList, updateList } from "~/server/api/list";
-import { createTask, deleteTask, updateTask } from "~/server/api/task";
+import { createTask, deleteTask, reorderTask, updateTask } from "~/server/api/task";
 import {
   fieldNumber,
   fieldString,
@@ -114,6 +114,16 @@ export async function mutateBoard(
 
         await updateTask(token, boardId, listId, taskId, {
           status: nextStatus,
+        });
+        return { ok: true };
+      }
+
+      case "reorderTask": {
+        await reorderTask(token, boardId, {
+          sourceListId: fieldString(fields, "sourceListId"),
+          targetListId: fieldString(fields, "targetListId"),
+          movedTaskId: fieldString(fields, "movedTaskId"),
+          targetOrder: fieldNumber(fields, "targetOrder"),
         });
         return { ok: true };
       }

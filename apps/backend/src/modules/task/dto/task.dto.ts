@@ -5,6 +5,7 @@ import {
   IsArray,
   IsEnum,
   IsInt,
+  IsIn,
   IsOptional,
   IsString,
   MaxLength,
@@ -67,6 +68,45 @@ export class CreateTaskDto implements SharedCreateTaskDto {
   @ArrayUnique()
   @IsString({ each: true })
   assignee?: string[];
+}
+
+export class ImproveTaskDto {
+  @ApiProperty({ enum: ['fix', 'enhance'], example: 'fix' })
+  @IsString()
+  @IsIn(['fix', 'enhance'])
+  mode!: 'fix' | 'enhance';
+
+  @ApiPropertyOptional({ example: 'Design API endpoints' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  title?: string;
+
+  @ApiPropertyOptional({ example: 'Outline the required endpoints and validation rules' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  description?: string;
+}
+
+export class ReorderTasksDto {
+  @ApiProperty({ example: 'list-a' })
+  @IsString()
+  sourceListId!: string;
+
+  @ApiProperty({ example: 'list-b' })
+  @IsString()
+  targetListId!: string;
+
+  @ApiProperty({ example: 'task-1' })
+  @IsString()
+  movedTaskId!: string;
+
+  @ApiProperty({ example: 1 })
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  targetOrder!: number;
 }
 
 export class UpdateTaskDto extends PartialType(CreateTaskDto) implements SharedUpdateTaskDto {

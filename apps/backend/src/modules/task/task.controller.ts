@@ -14,13 +14,26 @@ import { GetUser } from 'src/common/decorator';
 import { JwtGuard } from 'src/guard';
 
 import { TaskService } from './task.service';
-import { CreateTaskDto, UpdateTaskDto } from './dto/task.dto';
+import { CreateTaskDto, ImproveTaskDto, ReorderTasksDto, UpdateTaskDto } from './dto/task.dto';
 
 @ApiTags('task')
 @ApiBearerAuth()
 @Controller('task')
 export class TaskController {
   constructor(private readonly taskService: TaskService) {}
+
+  @UseGuards(JwtGuard)
+  @Post('reorder/:boardId')
+  @ApiOperation({ summary: 'Reorder tasks across lists' })
+  @ApiParam({ name: 'boardId', description: 'Board identifier' })
+  @ApiBody({ type: ReorderTasksDto })
+  reorderTasks(
+    @Param('boardId') boardId: string,
+    @Body() dto: ReorderTasksDto,
+    @GetUser() currentUser: User,
+  ) {
+    return this.taskService.reorderTasks(boardId, currentUser.id, dto);
+  }
 
   @UseGuards(JwtGuard)
   @Post(':boardId/:listId')
@@ -80,6 +93,29 @@ export class TaskController {
     @GetUser() currentUser: User,
   ) {
     return this.taskService.update(boardId, listId, taskId, currentUser.id, dto);
+  }
+
+  @UseGuards(JwtGuard)
+  @Post('ai/:boardId/:listId/:taskId')
+  @ApiOperation({ summary: 'Improve a task with AI assistance' })
+  @ApiParam({ name: 'boardId', description: 'Board identifier' })
+  @ApiParam({ name: 'listId', description: 'List identifier' })
+  @ApiParam({ name: 'taskId', description: 'Task identifier' })
+  @ApiBody({ type: ImproveTaskDto })
+  improveTask(
+    @Param('boardId') boardId: string,
+    @Param('listId') listId: string,
+    @Param('taskId') taskId: string,
+    @Body() dto: ImproveTaskDto,
+    @GetUser() currentUser: User,
+  ) {
+    return this.taskService.improveTask(
+      boardId,
+      listId,
+      taskId,
+      currentUser.id,
+      dto,
+    );
   }
 
   @UseGuards(JwtGuard)

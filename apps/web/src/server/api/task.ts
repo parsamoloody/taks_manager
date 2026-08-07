@@ -2,6 +2,11 @@
 import { TaskPriority, TaskStatus, type LabelDto } from "@repo/shared";
 import { requestJson } from "./client";
 
+export interface ReorderTaskResponse {
+  ok: boolean;
+  updatedTaskIds: string[];
+}
+
 export interface Task {
   id: string;
   listId: string;
@@ -98,6 +103,23 @@ export function deleteTask(
 ) {
   return requestJson<void>(`task/${boardId}/${listId}/${taskId}`, {
     method: "DELETE",
+    token,
+  });
+}
+
+export function reorderTask(
+  token: string,
+  boardId: string,
+  payload: {
+    sourceListId: string;
+    targetListId: string;
+    movedTaskId: string;
+    targetOrder: number;
+  },
+) {
+  return requestJson<ReorderTaskResponse>(`task/reorder/${boardId}`, {
+    method: "POST",
+    json: payload,
     token,
   });
 }
